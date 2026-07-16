@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="develop2.0 브랜치의 키오스크 주문·결제·지점 운영 구현 현황">
+  <title>Kiosk develop2.0 Summary</title>
+  <style>
+    :root {
+      --ink: #142334;
+      --muted: #617083;
+      --line: #dfe5eb;
+      --surface: #ffffff;
+      --soft: #f5f7f9;
+      --blue: #2563a7;
+      --blue-soft: #eaf2fb;
+      --pink: #df4f86;
+      --green: #15805f;
+      --green-soft: #e7f6f0;
+      --amber: #a96914;
+      --amber-soft: #fff1d8;
+      --gray-soft: #eef1f4;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #f7f8fa;
+      font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+    }
+    a { color: inherit; }
+    button { font: inherit; }
+    .wrap { width: min(1120px, calc(100% - 36px)); margin: 0 auto; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.94);
+      backdrop-filter: blur(12px);
+    }
+    .topbar-inner { min-height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .brand { display: flex; align-items: center; gap: 9px; font-weight: 950; }
+    .brand-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--pink); }
+    .topnav { display: flex; gap: 4px; overflow-x: auto; }
+    .topnav a { padding: 7px 10px; border-radius: 7px; color: var(--muted); text-decoration: none; font-size: 12px; font-weight: 850; white-space: nowrap; }
+    .topnav a:hover { color: var(--ink); background: var(--soft); }
+
+    .hero { padding: 58px 0 34px; }
+    .branch { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; border-radius: 999px; color: var(--blue); background: var(--blue-soft); font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 900; }
+    .branch::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+    h1 { max-width: 780px; margin: 17px 0 15px; font-size: clamp(38px, 6vw, 65px); line-height: 1.04; letter-spacing: -.055em; }
+    .hero p { max-width: 760px; margin: 0; color: var(--muted); font-size: 18px; }
+    .hero-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+    .link-button { display: inline-flex; align-items: center; padding: 9px 13px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); text-decoration: none; font-size: 13px; font-weight: 900; }
+    .link-button.primary { color: #fff; border-color: var(--ink); background: var(--ink); }
+
+    .facts { display: grid; grid-template-columns: repeat(4, 1fr); overflow: hidden; margin-bottom: 64px; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
+    .fact { padding: 19px 20px; border-right: 1px solid var(--line); }
+    .fact:last-child { border-right: 0; }
+    .fact strong { display: block; font-size: 25px; line-height: 1.2; letter-spacing: -.035em; }
+    .fact span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+
+    section { margin-bottom: 68px; scroll-margin-top: 78px; }
+    .section-head { display: grid; grid-template-columns: 72px 1fr; gap: 12px; align-items: start; margin-bottom: 20px; }
+    .section-no { padding-top: 5px; color: var(--pink); font-size: 12px; font-weight: 950; letter-spacing: .08em; }
+    h2 { margin: 0; font-size: clamp(27px, 4vw, 38px); line-height: 1.15; letter-spacing: -.04em; }
+    .section-copy { max-width: 770px; margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+
+    .status-strip { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
+    .status-cell { padding: 23px; }
+    .status-cell + .status-cell { border-left: 1px solid var(--line); }
+    .status-label { color: var(--muted); font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .status-cell h3 { margin: 8px 0 7px; font-size: 20px; letter-spacing: -.025em; }
+    .status-cell p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .flow-tabs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; margin-bottom: 12px; }
+    .flow-tab { padding: 12px 8px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); background: var(--surface); cursor: pointer; text-align: left; }
+    .flow-tab:hover { border-color: #a9bfd6; }
+    .flow-tab.active { color: #fff; border-color: var(--blue); background: var(--blue); }
+    .flow-tab span { display: block; font-size: 10px; font-weight: 900; opacity: .8; }
+    .flow-tab strong { display: block; margin-top: 3px; font-size: 12px; }
+
+    .preview { display: grid; grid-template-columns: .82fr 1.18fr; min-height: 430px; overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
+    .preview-info { padding: 27px; border-right: 1px solid var(--line); }
+    .preview-kicker { color: var(--blue); font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 900; }
+    .preview-info h3 { margin: 10px 0 9px; font-size: 25px; letter-spacing: -.035em; }
+    .preview-info p { margin: 0; color: var(--muted); font-size: 14px; }
+    .code-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 17px 0; }
+    .code { padding: 4px 7px; border-radius: 6px; color: var(--blue); background: var(--blue-soft); font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 900; }
+    .file { margin-top: 20px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; color: #435469; background: var(--soft); font-family: ui-monospace, Consolas, monospace; font-size: 11px; word-break: break-all; }
+    .preview-screen { display: grid; place-items: center; padding: 25px; background: #eef2f6; }
+
+    .kiosk-screen { width: min(100%, 560px); min-height: 342px; padding: 22px; border: 1px solid #ccd5de; border-radius: 13px; background: #fff; box-shadow: 0 12px 28px rgba(20,35,52,.08); }
+    .screen-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .screen-logo { color: var(--pink); font-size: 16px; font-weight: 950; }
+    .screen-home { padding: 6px 9px; border-radius: 7px; color: #fff; background: var(--ink); font-size: 10px; font-weight: 900; }
+    .screen-title { margin: 0 0 5px; font-size: 21px; }
+    .screen-sub { margin: 0 0 17px; color: var(--muted); font-size: 12px; }
+    .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .choice { min-height: 72px; display: grid; place-items: center; padding: 13px; border: 1px solid #d8e0e7; border-radius: 10px; background: #f8fafb; text-align: center; font-size: 12px; font-weight: 900; }
+    .choice.selected { color: #fff; border-color: var(--blue); background: var(--blue); }
+    .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .menu-card { padding: 9px; border: 1px solid #dce3e9; border-radius: 9px; font-size: 10px; font-weight: 850; }
+    .scoop { height: 52px; margin-bottom: 7px; border-radius: 7px; background: linear-gradient(135deg,#ffd7e6,#e97da6); }
+    .scoop.choco { background: linear-gradient(135deg,#e2c0aa,#895a45); }
+    .scoop.mint { background: linear-gradient(135deg,#d6f3e9,#63c3a7); }
+    .scoop.blue { background: linear-gradient(135deg,#d9e9fb,#6c9bd1); }
+    .progress { height: 7px; overflow: hidden; margin: 12px 0; border-radius: 999px; background: #e8edf1; }
+    .progress span { display: block; width: 60%; height: 100%; background: var(--pink); }
+    .cart-line { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid #edf0f3; font-size: 11px; }
+    .mock-actions { display: flex; gap: 7px; margin-top: 15px; }
+    .mock-button { flex: 1; padding: 9px; border-radius: 8px; color: #fff; background: var(--ink); text-align: center; font-size: 10px; font-weight: 900; }
+    .mock-button.primary { background: var(--pink); }
+    .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; max-width: 260px; }
+    .key { padding: 8px; border-radius: 6px; background: #edf1f4; text-align: center; font-size: 10px; font-weight: 900; }
+    .qr { width: 128px; aspect-ratio: 1; margin: 13px auto; border: 9px solid #fff; background: repeating-conic-gradient(#142334 0 25%,#fff 0 50%) 0/17px 17px; box-shadow: 0 0 0 1px #ccd5de; }
+    .receipt { width: 220px; margin: 0 auto; padding: 17px; border: 1px solid #d7dde3; background: #fff; box-shadow: 0 8px 20px rgba(20,35,52,.08); font-family: ui-monospace, Consolas, monospace; font-size: 9px; }
+    .receipt h4 { margin: 0 0 8px; text-align: center; font-size: 12px; }
+    .receipt hr { border: 0; border-top: 1px dashed #99a5b0; }
+
+    .detail-list { display: grid; grid-template-columns: repeat(2, 1fr); overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
+    .detail { padding: 20px; border-bottom: 1px solid var(--line); }
+    .detail:nth-child(odd) { border-right: 1px solid var(--line); }
+    .detail:nth-last-child(-n+2) { border-bottom: 0; }
+    .detail-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .detail h3 { margin: 8px 0 5px; font-size: 17px; }
+    .detail p { margin: 0; color: var(--muted); font-size: 12px; }
+    .status { padding: 4px 7px; border-radius: 999px; font-size: 10px; font-weight: 950; white-space: nowrap; }
+    .done { color: var(--green); background: var(--green-soft); }
+    .partial { color: var(--amber); background: var(--amber-soft); }
+    .pending { color: var(--muted); background: var(--gray-soft); }
+
+    .requirements { border: 1px solid var(--line); border-radius: 15px; background: var(--surface); overflow: hidden; }
+    .requirements > summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 20px; cursor: pointer; list-style: none; font-weight: 950; }
+    .requirements > summary::-webkit-details-marker { display: none; }
+    .requirements > summary span { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .table-wrap { overflow-x: auto; border-top: 1px solid var(--line); }
+    table { width: 100%; min-width: 820px; border-collapse: collapse; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; font-size: 12px; }
+    th { color: var(--muted); background: var(--soft); font-size: 10px; letter-spacing: .06em; }
+    tbody tr:last-child td { border-bottom: 0; }
+    td:first-child { color: var(--blue); font-family: ui-monospace, Consolas, monospace; font-weight: 950; white-space: nowrap; }
+    td:nth-child(2) { font-weight: 900; white-space: nowrap; }
+    .reason { color: var(--muted); }
+
+    .tech-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .tech-card { padding: 21px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+    .tech-card h3 { margin: 0 0 13px; font-size: 18px; }
+    .tech-list { list-style: none; margin: 0; padding: 0; }
+    .tech-list li { padding: 9px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .tech-list code { color: var(--blue); font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 850; }
+
+    .gap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .gap { padding: 18px; border: 1px solid #ead8ba; border-radius: 13px; background: #fffaf1; }
+    .gap strong { display: block; margin-bottom: 5px; font-size: 14px; }
+    .gap p { margin: 0; color: #735f42; font-size: 12px; }
+
+    footer { padding: 28px 0 42px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 18px; }
+
+    @media (max-width: 900px) {
+      .facts { grid-template-columns: 1fr 1fr; }
+      .fact:nth-child(2) { border-right: 0; }
+      .fact:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .flow-tabs { grid-template-columns: repeat(4, 1fr); }
+      .preview { grid-template-columns: 1fr; }
+      .preview-info { border-right: 0; border-bottom: 1px solid var(--line); }
+      .gap-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .wrap { width: min(100% - 22px, 1120px); }
+      .topbar-inner { align-items: flex-start; flex-direction: column; padding: 11px 0; }
+      .topnav { width: 100%; }
+      .hero { padding-top: 42px; }
+      .facts, .status-strip, .detail-list, .tech-grid, .gap-grid { grid-template-columns: 1fr; }
+      .fact { border-right: 0; border-bottom: 1px solid var(--line); }
+      .fact:last-child { border-bottom: 0; }
+      .status-cell + .status-cell { border-left: 0; border-top: 1px solid var(--line); }
+      .section-head { grid-template-columns: 1fr; gap: 2px; }
+      .flow-tabs { grid-template-columns: 1fr 1fr; }
+      .detail, .detail:nth-child(odd), .detail:nth-last-child(-n+2) { border-right: 0; border-bottom: 1px solid var(--line); }
+      .detail:last-child { border-bottom: 0; }
+      .menu-grid { grid-template-columns: 1fr 1fr; }
+      .footer-inner { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand"><span class="brand-dot"></span>KIOSK ORDER FLOW</div>
+      <nav class="topnav" aria-label="문서 바로가기">
+        <a href="#status">현재 상태</a><a href="#flow">주문 흐름</a><a href="#details">확장 범위</a><a href="#requirements">식별코드</a><a href="#gaps">남은 부분</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <span class="branch">develop2.0</span>
+      <h1>키오스크·지점 운영<br>통합 구현 현황</h1>
+      <p>키오스크 주문과 실제 Toss 결제, 영수증 출력, Firebase 지점 계정, 지점 주문·재고·매출 관리까지 연결된 범위를 간결하게 정리했습니다.</p>
+      <div class="hero-links">
+        <a class="link-button primary" href="https://github.com/warning1210/kiosk/tree/develop2.0" target="_blank" rel="noreferrer">브랜치 열기 ↗</a>
+        <a class="link-button" href="https://github.com/warning1210/kiosk/blob/develop2.0/frontend/src/stores/orderFlow.js" target="_blank" rel="noreferrer">orderFlow.js ↗</a>
+      </div>
+    </section>
+
+    <div class="facts" aria-label="핵심 구현 수치">
+      <div class="fact"><strong>7단계</strong><span>키오스크 주문 컴포넌트</span></div>
+      <div class="fact"><strong>12개</strong><span>키오스크·관리자·지점 라우트</span></div>
+      <div class="fact"><strong>3종</strong><span>Toss · Firebase · 로컬 프린터</span></div>
+      <div class="fact"><strong>15 / 21</strong><span>키오스크 명세 완전 충족</span></div>
+    </div>
+
+    <section id="status">
+      <div class="section-head"><div class="section-no">01 / NOW</div><div><h2>현재 상태</h2><p class="section-copy">주문·결제·영수증과 지점 운영 화면의 기반이 연결돼 있습니다. 실제 운영 전에는 지점 식별과 일부 UI 기능, 외부 서비스 환경설정을 보완해야 합니다.</p></div></div>
+      <div class="status-strip">
+        <div class="status-cell"><div class="status-label">Customer flow</div><h3>QR → Toss 결제 → 영수증 출력</h3><p>QR로 CheckoutView를 열고 Toss SDK 결제 성공을 서버에서 승인한 뒤 영수증 조회·출력으로 이어집니다.</p></div>
+        <div class="status-cell"><div class="status-label">Branch operation</div><h3>계정·주문·재고·매출 화면 추가</h3><p>Firebase 지점 가입·로그인과 branchId 접근 검증, 지점 주문·재고·판매 화면 및 API가 포함됩니다.</p></div>
+      </div>
+    </section>
+
+    <section id="flow">
+      <div class="section-head"><div class="section-no">02 / FLOW</div><div><h2>단계를 눌러 구현 화면 보기</h2><p class="section-copy">아래 단계 버튼을 누르면 해당 컴포넌트가 담당하는 화면과 코드 위치가 바뀝니다.</p></div></div>
+      <div class="flow-tabs" role="tablist" aria-label="주문 단계">
+        <button class="flow-tab active" type="button" data-step="orderType"><span>01</span><strong>매장/포장</strong></button>
+        <button class="flow-tab" type="button" data-step="product"><span>02</span><strong>상품</strong></button>
+        <button class="flow-tab" type="button" data-step="container"><span>03</span><strong>용기</strong></button>
+        <button class="flow-tab" type="button" data-step="flavor"><span>04</span><strong>맛·옵션</strong></button>
+        <button class="flow-tab" type="button" data-step="cart"><span>05</span><strong>장바구니</strong></button>
+        <button class="flow-tab" type="button" data-step="customer"><span>06</span><strong>포인트·결제</strong></button>
+        <button class="flow-tab" type="button" data-step="receipt"><span>07</span><strong>영수증</strong></button>
+      </div>
+      <div class="preview">
+        <div class="preview-info">
+          <div id="previewKicker" class="preview-kicker">STEP 01 · OrderTypeStep.vue</div>
+          <h3 id="previewTitle">매장 / 포장 선택</h3>
+          <p id="previewDescription">팝업으로 주문 방식을 선택하고 영어 보조 문구를 함께 표시합니다.</p>
+          <div id="previewCodes" class="code-row"><span class="code">CU-002</span></div>
+          <div id="previewFile" class="file">frontend/src/views/kiosk/steps/OrderTypeStep.vue</div>
+        </div>
+        <div id="previewScreen" class="preview-screen"></div>
+      </div>
+    </section>
+
+    <section id="details">
+      <div class="section-head"><div class="section-no">03 / SCOPE</div><div><h2>develop2.0 확장 범위</h2><p class="section-copy">기존 주문 흐름에 더해 이 브랜치에서 실제 코드로 확인되는 주요 확장입니다.</p></div></div>
+      <div class="detail-list">
+        <article class="detail"><div class="detail-top"><span class="code">TOSS</span><span class="status done">연결</span></div><h3>실제 Toss Payments 결제</h3><p>CheckoutView가 Toss SDK 결제창을 열고 백엔드 TossPaymentGateway가 결제 승인을 처리합니다.</p></article>
+        <article class="detail"><div class="detail-top"><span class="code">RECEIPT</span><span class="status done">연결</span></div><h3>영수증 조회와 로컬 출력</h3><p>ReceiptController와 ReceiptService가 화면 데이터와 프린터 출력 성공·오프라인 결과를 제공합니다.</p></article>
+        <article class="detail"><div class="detail-top"><span class="code">FIREBASE</span><span class="status done">기반</span></div><h3>지점 가입·로그인·승인</h3><p>Firebase 세션, 지점 가입 화면, 본점 계정 승인 화면과 관련 서비스가 추가됐습니다.</p></article>
+        <article class="detail"><div class="detail-top"><span class="code">ACCESS</span><span class="status done">기반</span></div><h3>지점별 데이터 접근 제어</h3><p>BranchAccessService가 로그인 지점과 요청 branchId를 검증하고 비인증 접근을 차단합니다.</p></article>
+        <article class="detail"><div class="detail-top"><span class="code">BRANCH</span><span class="status done">기반</span></div><h3>주문·재고·판매 관리</h3><p>지점 Orders, Inventory, Sales 화면과 Controller·Service가 추가돼 운영 기능의 기본 흐름을 제공합니다.</p></article>
+        <article class="detail"><div class="detail-top"><span class="code">KIOSK UI</span><span class="status done">개선</span></div><h3>1024px 키오스크 UI 적용</h3><p>상품 이미지·아이콘, 핑크 테마, 4열 상품/맛 그리드와 고정 하단 액션 바가 적용됐습니다.</p></article>
+      </div>
+    </section>
+
+    <section id="requirements">
+      <div class="section-head"><div class="section-no">04 / CODES</div><div><h2>관련 식별코드 21개</h2><p class="section-copy">전체 본점·분점 요구사항은 제외하고 이 브랜치와 직접 관계있는 고객 키오스크 코드만 표시합니다.</p></div></div>
+      <details class="requirements" open>
+        <summary>키오스크 요구사항 상세 <span>완료 15 · 부분 6 · 대기 0</span></summary>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>코드</th><th>기능</th><th>상태</th><th>브랜치 기준 판정</th></tr></thead>
+            <tbody>
+              <tr><td>CU-001</td><td>광고 화면 진입</td><td><span class="status done">완료</span></td><td class="reason">HomeView 터치 시 cart.clear() 후 /kiosk/order 이동.</td></tr>
+              <tr><td>CU-002</td><td>매장/픽업 선택</td><td><span class="status done">완료</span></td><td class="reason">OrderTypeStep 팝업과 Dine in / Takeout 영문 병기.</td></tr>
+              <tr><td>CU-003</td><td>아이스크림 사이즈 선택</td><td><span class="status partial">부분</span></td><td class="reason">상품 자체가 사이즈 역할을 하지만 명세의 별도 사이즈 단계·대용량 분기 기록은 불명확.</td></tr>
+              <tr><td>CU-004</td><td>사이즈별 상품 선택</td><td><span class="status done">완료</span></td><td class="reason">ProductStep에서 카테고리별 판매 상품 선택.</td></tr>
+              <tr><td>CU-005</td><td>픽업일시·컵/콘</td><td><span class="status partial">부분</span></td><td class="reason">컵/콘 선택은 구현됐으나 픽업 시간 선택은 없음.</td></tr>
+              <tr><td>CU-006</td><td>맛 선택</td><td><span class="status done">완료</span></td><td class="reason">selectableFlavorCount에 맞춰 맛 선택, 동일 맛 중복 선택 지원.</td></tr>
+              <tr><td>CU-006-1</td><td>담기 버튼 활성화</td><td><span class="status done">완료</span></td><td class="reason">canConfirmFlavor 조건 충족 전 버튼 비활성화.</td></tr>
+              <tr><td>CU-006-2</td><td>선택 진행률</td><td><span class="status done">완료</span></td><td class="reason">현재 선택 수 / 선택 가능 수를 화면에 표시.</td></tr>
+              <tr><td>CU-007</td><td>장바구니 표시</td><td><span class="status done">완료</span></td><td class="reason">상품, 맛, 수량, 금액, 주문 방식을 CartStep에서 표시.</td></tr>
+              <tr><td>CU-007-1</td><td>메뉴 삭제</td><td><span class="status done">완료</span></td><td class="reason">confirm() 재확인 후 cart.removeItem 실행.</td></tr>
+              <tr><td>CU-007-2</td><td>메뉴 수정</td><td><span class="status done">완료</span></td><td class="reason">기존 옵션을 복원해 FlavorStep에서 수정 후 updateItem.</td></tr>
+              <tr><td>CU-008</td><td>포인트/할인 선택</td><td><span class="status done">완료</span></td><td class="reason">회원 조회, 등급별 적립, ±100/1000, 최대 사용 구현.</td></tr>
+              <tr><td>CU-009</td><td>결제 실행</td><td><span class="status done">완료</span></td><td class="reason">QR로 CheckoutView 진입 후 Toss Payments SDK 카드 결제 실행.</td></tr>
+              <tr><td>CU-009-1</td><td>QR 결제·재시도</td><td><span class="status done">완료</span></td><td class="reason">QR 상태 조회·재생성과 Toss 결제 성공/실패 리다이렉트 구현.</td></tr>
+              <tr><td>CU-009-2</td><td>포인트 미적립 알림</td><td><span class="status done">완료</span></td><td class="reason">결제 완료 후 고객번호가 없으면 적립 혜택 재안내.</td></tr>
+              <tr><td>CU-010</td><td>4개 언어</td><td><span class="status partial">부분</span></td><td class="reason">언어 선택 pill과 globe 아이콘은 있으나 실제 번역 상태는 없고 checkout language는 ko 고정.</td></tr>
+              <tr><td>CU-011</td><td>쉬운모드</td><td><span class="status partial">부분</span></td><td class="reason">쉬운모드 버튼 UI는 있으나 글자 확대·2×2/3×3 레이아웃 전환 동작은 확인되지 않음.</td></tr>
+              <tr><td>CU-012</td><td>추천메뉴 기본 탭</td><td><span class="status partial">부분</span></td><td class="reason">카테고리 탭과 상품 이미지는 있으나 판매량 2개 + 지점 추천 2개 구성 로직은 미확인.</td></tr>
+              <tr><td>CU-013</td><td>대용량 부속 옵션</td><td><span class="status done">완료</span></td><td class="reason">대용량 상품에 숟가락 수와 드라이아이스 10/20/30분 선택 제공.</td></tr>
+              <tr><td>CU-014</td><td>홈 버튼</td><td><span class="status done">완료</span></td><td class="reason">진행 상품이 있으면 취소 확인 후 상태 정리 및 홈 복귀.</td></tr>
+              <tr><td>CU-015</td><td>직원 호출</td><td><span class="status partial">부분</span></td><td class="reason">상단 bell 아이콘은 추가됐으나 Firebase 직원 호출 요청과 지점 알림 연결은 미확인.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <section id="structure">
+      <div class="section-head"><div class="section-no">05 / CODE</div><div><h2>코드 구조와 연동</h2><p class="section-copy">develop2.0의 고객 결제와 지점 운영을 따라갈 때 먼저 보면 되는 파일입니다.</p></div></div>
+      <div class="tech-grid">
+        <article class="tech-card"><h3>Frontend</h3><ul class="tech-list"><li><code>OrderView + steps/*</code> · 7단계 주문 UI</li><li><code>orderFlow.js</code> · 메뉴, 회원, QR, 영수증 상태</li><li><code>CheckoutView.vue</code> · Toss 결제창 호출</li><li><code>PaymentSuccessView.vue</code> · 결제 승인 후 결과 처리</li><li><code>branch/*.vue</code> · 계정·주문·재고·매출 화면</li></ul></article>
+        <article class="tech-card"><h3>Backend / Integration</h3><ul class="tech-list"><li><code>PaymentController</code> · QR·checkout·Toss confirm</li><li><code>TossPaymentGateway</code> · Toss REST 승인 요청</li><li><code>ReceiptController</code> · 영수증 조회·출력</li><li><code>BranchAuth / BranchAccess</code> · Firebase 인증·지점 격리</li><li><code>BranchInventory / Order / Sales</code> · 지점 운영 API</li></ul></article>
+      </div>
+    </section>
+
+    <section id="gaps">
+      <div class="section-head"><div class="section-no">06 / NEXT</div><div><h2>운영 전 남은 부분</h2><p class="section-copy">develop2.0을 실제 매장 운영 수준으로 올리기 위해 명확히 남아 있는 항목입니다.</p></div></div>
+      <div class="gap-grid">
+        <article class="gap"><strong>픽업 시간 선택</strong><p>컵/콘은 있지만 지금·30분 후·1시간 후 선택은 아직 없습니다.</p></article>
+        <article class="gap"><strong>지점 식별</strong><p>체크아웃 payload의 branchId가 임시로 1에 고정돼 있습니다.</p></article>
+        <article class="gap"><strong>다국어·쉬운모드 동작</strong><p>버튼과 아이콘은 있으나 실제 번역·레이아웃 변경 상태 연결이 남았습니다.</p></article>
+        <article class="gap"><strong>추천메뉴 로직</strong><p>판매량 상위 2개와 지점 선정 2개를 합치는 데이터 규칙은 확인되지 않습니다.</p></article>
+        <article class="gap"><strong>직원 호출 연결</strong><p>bell UI는 있으나 Firebase 호출 요청과 지점 알림 수신 연결이 남았습니다.</p></article>
+        <article class="gap"><strong>환경설정·브랜치 정리</strong><p>Toss/Firebase/프린터 운영 키 설정과 갈라진 주문 브랜치 이력 통합이 필요합니다.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="wrap footer-inner"><span>develop2.0 기준 · 2026-07-16</span><span>warning1210/kiosk</span></div></footer>
+
+  <script>
+    const stepData = {
+      orderType: {
+        no: '01', component: 'OrderTypeStep.vue', title: '매장 / 포장 선택',
+        description: '팝업으로 주문 방식을 선택하고 Dine in / Takeout 영어 보조 문구를 함께 표시합니다.',
+        codes: ['CU-002'], file: 'frontend/src/views/kiosk/steps/OrderTypeStep.vue',
+        screen: '<div class="kiosk-screen"><div class="screen-top"><span class="screen-logo">31 KIOSK</span><span class="screen-home">⌂ 처음으로</span></div><h4 class="screen-title">매장에서 드시나요, 포장하시나요?</h4><p class="screen-sub">Dine in or Takeout?</p><div class="choice-grid"><div class="choice selected">매장<br>Dine in</div><div class="choice">포장<br>Takeout</div></div></div>'
+      },
+      product: {
+        no: '02', component: 'ProductStep.vue', title: '카테고리와 상품 선택',
+        description: '서버에서 카테고리·상품을 불러오고 선택한 카테고리에 해당하는 상품만 표시합니다.',
+        codes: ['CU-003','CU-004','CU-012'], file: 'frontend/src/views/kiosk/steps/ProductStep.vue',
+        screen: '<div class="kiosk-screen"><div class="screen-top"><span class="screen-logo">31 KIOSK</span><span class="screen-home">장바구니 1</span></div><h4 class="screen-title">아이스크림 메뉴 선택</h4><p class="screen-sub">아이스크림 · 커피 카테고리 탭</p><div class="menu-grid"><div class="menu-card"><div class="scoop"></div>싱글 레귤러</div><div class="menu-card"><div class="scoop choco"></div>더블 주니어</div><div class="menu-card"><div class="scoop mint"></div>파인트</div><div class="menu-card"><div class="scoop blue"></div>패밀리</div><div class="menu-card"><div class="scoop"></div>하프갤런</div><div class="menu-card"><div class="scoop choco"></div>아메리카노</div></div></div>'
+      },
+      container: {
+        no: '03', component: 'ContainerStep.vue', title: '컵 / 콘 용기 선택',
+        description: 'CUP_OR_CONE 상품만 이 단계를 거치며 컵 전용·옵션 없는 상품은 자동으로 건너뜁니다.',
+        codes: ['CU-005'], file: 'frontend/src/views/kiosk/steps/ContainerStep.vue',
+        screen: '<div class="kiosk-screen"><div class="screen-top"><span class="screen-logo">31 KIOSK</span><span class="screen-home">⌂ 처음으로</span></div><h4 class="screen-title">싱글 레귤러 · 용기 선택</h4><p class="screen-sub">어떤 용기에 담아드릴까요?</p><div class="choice-grid"><div class="choice selected">🥤 컵 ✓</div><div class="choice">🍦 콘</div></div><div class="mock-actions"><div class="mock-button">뒤로</div><div class="mock-button primary">다음</div></div></div>'
+      },
+      flavor: {
+        no: '04', component: 'FlavorStep.vue', title: '맛과 대용량 옵션 선택',
+        description: '선택 개수를 검증하고 같은 맛 중복 선택, 숟가락 수, 드라이아이스 시간을 처리합니다.',
+        codes: ['CU-006','CU-006-1','CU-006-2','CU-013'], file: 'frontend/src/views/kiosk/steps/FlavorStep.vue',
+        screen: '<div class="kiosk-screen"><div class="screen-top"><span class="screen-logo">31 KIOSK</span><span class="screen-home">맛 선택 3 / 5</span></div><h4 class="screen-title">패밀리 · 맛 선택</h4><div class="progress"><span></span></div><div class="menu-grid"><div class="choice selected">엄마는 외계인 ×2</div><div class="choice selected">민트초코 ×1</div><div class="choice">바닐라</div><div class="choice">뉴욕치즈</div><div class="choice">초콜릿</div><div class="choice">체리쥬빌레</div></div><div class="mock-actions"><div class="mock-button">숟가락 3</div><div class="mock-button">드라이 20분</div><div class="mock-button primary">담기</div></div></div>'
+      },
+      cart: {
+        no: '05', component: 'CartStep.vue', title: '장바구니 확인과 수정',
+        description: '상품·맛·금액을 표시하고 항목 수정, 삭제 재확인, 메뉴 추가와 결제 이동을 제공합니다.',
+        codes: ['CU-007','CU-007-1','CU-007-2'], file: 'frontend/src/views/kiosk/steps/CartStep.vue',
+        screen: '<div class="kiosk-screen"><div class="screen-top"><span class="screen-logo">장바구니</span><span class="screen-home">포장 · 2개</span></div><div class="cart-line"><span><b>파인트</b><br>엄마는 외계인, 민트초코, 바닐라</span><b>9,800원</b></div><div class="cart-line"><span><b>싱글 레귤러</b><br>뉴욕 치즈케이크</span><b>3,900원</b></div><div class="cart-line"><b>합계</b><b>13,700원</b></div><div class="mock-actions"><div class="mock-button">메뉴 더 담기</div><div class="mock-button primary">결제</div></div></div>'
+      },
+      customer: {
+        no: '06', component: 'CustomerPaymentStep.vue', title: '회원·포인트와 QR 결제',
+        description: '휴대폰 회원 조회, 등급별 적립, 포인트 사용, 체크아웃과 QR 결제 상태 확인을 한 단계에서 처리합니다.',
+        codes: ['CU-008','CU-009','CU-009-1','CU-009-2'], file: 'frontend/src/views/kiosk/steps/CustomerPaymentStep.vue',
+        screen: '<div class="kiosk-screen"><div class="screen-top"><span class="screen-logo">포인트 / 결제</span><span class="screen-home">FAMILY · 5%</span></div><div class="choice-grid"><div><p class="screen-sub">휴대폰 번호</p><div class="keypad"><div class="key">1</div><div class="key">2</div><div class="key">3</div><div class="key">4</div><div class="key">5</div><div class="key">6</div><div class="key">7</div><div class="key">8</div><div class="key">9</div></div></div><div><p class="screen-sub">결제 QR</p><div class="qr"></div></div></div><div class="mock-actions"><div class="mock-button">최대 포인트</div><div class="mock-button primary">13,700원 결제</div></div></div>'
+      },
+      receipt: {
+        no: '07', component: 'ReceiptStep.vue', title: '결제 완료와 영수증',
+        description: '결제 완료 후 주문 영수증을 화면에 표시하고 로컬 프린터 출력을 자동 요청합니다.',
+        codes: ['RECEIPT'], file: 'frontend/src/views/kiosk/steps/ReceiptStep.vue',
+        screen: '<div class="kiosk-screen"><div class="screen-top"><span class="screen-logo">✓ 결제가 완료되었습니다</span><span class="screen-home">출력 완료</span></div><div class="receipt"><h4>31 ICE CREAM</h4><p style="text-align:center">주문번호 A-104</p><hr><p>파인트 <span style="float:right">9,800원</span></p><p>맛: 민트초코, 바닐라</p><hr><p><b>결제 금액</b><b style="float:right">9,800원</b></p><p>결제수단: QR 간편결제</p><hr><p style="text-align:center">이용해 주셔서 감사합니다</p></div><div class="mock-actions"><div class="mock-button">다시 출력</div><div class="mock-button primary">완료</div></div></div>'
+      }
+    };
+
+    const tabs = document.querySelectorAll('.flow-tab');
+    function renderStep(key) {
+      const step = stepData[key];
+      document.getElementById('previewKicker').textContent = 'STEP ' + step.no + ' · ' + step.component;
+      document.getElementById('previewTitle').textContent = step.title;
+      document.getElementById('previewDescription').textContent = step.description;
+      document.getElementById('previewCodes').innerHTML = step.codes.map(function(code) { return '<span class="code">' + code + '</span>'; }).join('');
+      document.getElementById('previewFile').textContent = step.file;
+      document.getElementById('previewScreen').innerHTML = step.screen;
+      tabs.forEach(function(tab) { tab.classList.toggle('active', tab.dataset.step === key); });
+    }
+    tabs.forEach(function(tab) { tab.addEventListener('click', function() { renderStep(tab.dataset.step); }); });
+    renderStep('orderType');
+  </script>
+</body>
+</html>
