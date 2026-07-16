@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>베스킨라빈스 키오스크 & 관리자 시스템 - 요구사항 정의서</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root {
+    --navy-dark: #12173D;
+    --circle-purple: #3B1454;
+    --circle-navy: #13245E;
+
+    --pink: #E50F89;
+    --pink-soft: #FFE3F2;
+    --blue: #0154C4;
+    --blue-soft: #DEEFFB;
+    --green: #1F9457;
+    --green-soft: #E3F5EA;
+    --purple: #6B3FA0;
+    --purple-soft: #EFE6F8;
+
+    --ink: #232323;
+    --sub: #8B8B93;
+    --card-bg: #FBF7FA;
+    --divider: #ECE7EA;
+    --table-navy: #171E4A;
+    --pill-ok: #238A55;
+    --pill-limited: #C98A00;
+    --pill-no: #C0392B;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, "Malgun Gothic", sans-serif;
+    color: var(--ink);
+    background: #fff;
+  }
+  section {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 64px 56px;
+  }
+  .eyebrow-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 40px;
+    letter-spacing: -0.01em;
+  }
+
+  /* ===== Hero / Title slide ===== */
+  .hero {
+    position: relative;
+    background: var(--navy-dark);
+    color: #fff;
+    padding: 130px 70px;
+    overflow: hidden;
+    max-width: 100%;
+  }
+  .hero .circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(2px);
+  }
+  .hero .circle.c1 {
+    width: 520px; height: 520px;
+    background: var(--circle-purple);
+    top: -180px; right: -80px;
+  }
+  .hero .circle.c2 {
+    width: 460px; height: 460px;
+    background: var(--circle-navy);
+    bottom: -220px; right: 60px;
+  }
+  .hero-inner { position: relative; z-index: 1; max-width: 640px; }
+  .hero h1 {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.35;
+    margin: 0 0 20px;
+  }
+  .hero p {
+    font-size: 16px;
+    color: #C7CBE0;
+    margin: 0;
+  }
+
+  /* ===== Generic card grids ===== */
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+
+  /* Slide 2: 시스템 구성 */
+  .sys-card {
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 34px 26px;
+    text-align: center;
+  }
+  .sys-icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin: 0 auto 18px;
+  }
+  .sys-icon.pink { background: var(--pink-soft); color: var(--pink); }
+  .sys-icon.blue { background: var(--blue-soft); color: var(--blue); }
+  .sys-icon.green { background: var(--green); color: #fff; }
+  .sys-card h3 { font-size: 18px; font-weight: 800; margin: 0 0 8px; }
+  .sys-card .target { font-size: 13px; font-weight: 700; margin: 0 0 10px; }
+  .sys-card .target.pink { color: var(--pink); }
+  .sys-card .target.blue { color: var(--blue); }
+  .sys-card .target.green { color: var(--green); }
+  .sys-card .desc { font-size: 13.5px; color: var(--sub); margin: 0 0 20px; }
+  .sys-card hr { border: none; border-top: 1px solid var(--divider); margin: 0 0 18px; }
+  .sys-card ul { list-style: none; margin: 0; padding: 0; text-align: left; }
+  .sys-card ul li {
+    font-size: 13.5px;
+    color: var(--ink);
+    margin-bottom: 12px;
+    padding-left: 18px;
+    position: relative;
+  }
+  .sys-card ul li::before {
+    content: "";
+    position: absolute; left: 0; top: 6px;
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .sys-card.pink ul li::before { background: var(--pink); }
+  .sys-card.blue ul li::before { background: var(--blue); }
+  .sys-card.green ul li::before { background: var(--green); }
+
+  /* Slide 3: 사용자 역할 */
+  .role-card {
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 30px 20px;
+    text-align: center;
+  }
+  .role-icon {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin: 0 auto 14px;
+  }
+  .role-icon.pink { background: var(--pink-soft); color: var(--pink); }
+  .role-icon.blue { background: var(--blue-soft); color: var(--blue); }
+  .role-icon.green { background: var(--green-soft); color: var(--green); }
+  .role-icon.purple { background: var(--purple-soft); color: var(--purple); }
+  .role-card h3 { font-size: 16.5px; font-weight: 800; margin: 0 0 8px; }
+  .role-card .desc { font-size: 12.5px; color: var(--sub); margin: 0 0 14px; min-height: 48px; }
+  .role-card .scope-label { font-size: 11.5px; font-weight: 800; margin-bottom: 6px; }
+  .role-card .scope-label.pink { color: var(--pink); }
+  .role-card .scope-label.blue { color: var(--blue); }
+  .role-card .scope-label.green { color: var(--green); }
+  .role-card .scope-label.purple { color: var(--purple); }
+  .role-card .scope-text { font-size: 12.5px; color: var(--sub); }
+
+  /* Slide 4/5: flow diagrams */
+  .flow-row { display: flex; gap: 16px; margin-bottom: 18px; }
+  .flow-card {
+    flex: 1;
+    position: relative;
+    border-radius: 16px;
+    padding: 20px 16px 18px;
+  }
+  .flow-card.pink-theme { background: var(--pink-soft); }
+  .flow-card.blue-theme { background: var(--blue-soft); }
+  .flow-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .flow-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    color: #fff; font-weight: 800; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .flow-num.pink { background: var(--pink); }
+  .flow-num.blue { background: var(--blue); }
+  .flow-icon {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .flow-icon.pink { background: #fff; color: var(--pink); }
+  .flow-icon.blue { background: #fff; color: var(--blue); }
+  .flow-card h4 { font-size: 14.5px; font-weight: 800; margin: 0 0 10px; }
+  .flow-card p { font-size: 12px; color: #5C5C63; margin: 0; line-height: 1.5; }
+  .flow-connector {
+    position: absolute;
+    top: 34px; right: -13px;
+    font-size: 18px; font-weight: 800;
+    z-index: 2;
+  }
+  .flow-connector.pink { color: var(--pink); }
+  .flow-connector.blue { color: var(--blue); }
+
+  /* Slide 6 / 8: step badge cards */
+  .step-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+  }
+  .step-card.green-theme { background: var(--green-soft); }
+  .step-top { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .step-icon {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    background: var(--pink-soft); color: var(--pink);
+  }
+  .step-code { font-size: 12.5px; font-weight: 800; color: var(--pink); }
+  .step-code.green { color: var(--green); }
+  .step-card h4 { font-size: 14.5px; font-weight: 700; margin: 0 0 22px; }
+  .step-foot { font-size: 11px; color: var(--sub); text-align: right; }
+
+  /* Slide 7: mobile two-column */
+  .mo-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+  .mo-col-title { font-size: 13px; font-weight: 800; color: var(--pink); margin-bottom: 16px; }
+  .mo-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--divider);
+  }
+  .mo-item:last-child { border-bottom: none; }
+  .mo-sq {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--pink-soft); color: var(--pink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .mo-code { font-size: 11px; color: var(--pink); font-weight: 800; }
+  .mo-item h5 { font-size: 14px; margin: 2px 0 0; font-weight: 700; }
+  .mo-req-label { font-size: 13px; font-weight: 800; margin: 0 0 3px; }
+  .mo-req-desc { font-size: 12.5px; color: var(--sub); margin: 0; }
+
+  /* Slide 8: table */
+  table.matrix {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+  }
+  table.matrix th {
+    background: var(--table-navy);
+    color: #fff;
+    font-weight: 700;
+    padding: 12px 16px;
+    text-align: left;
+  }
+  table.matrix th:not(:first-child), table.matrix td:not(:first-child) { text-align: center; }
+  table.matrix td { padding: 12px 16px; border-bottom: 1px solid var(--divider); }
+  table.matrix tr:nth-child(even) td { background: #FAFAFA; }
+  .pill-ok { color: var(--pill-ok); font-weight: 700; }
+  .pill-limited { color: var(--pill-limited); font-weight: 700; }
+  .pill-no { color: var(--pill-no); font-weight: 700; }
+
+  /* Slide 9: data model */
+  .domain-card {
+    border-radius: 16px;
+    padding: 24px 20px;
+  }
+  .domain-card .dm-icon {
+    width: 42px; height: 42px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 14px;
+    background: rgba(255,255,255,0.6);
+  }
+  .domain-card h4 { margin: 0 0 8px; font-size: 15px; font-weight: 800; }
+  .domain-card p { margin: 0; font-size: 12.5px; color: #55555C; line-height: 1.5; }
+  .domain-1 { background: var(--pink-soft); }
+  .domain-1 .dm-icon { color: var(--pink); }
+  .domain-2 { background: var(--blue-soft); }
+  .domain-2 .dm-icon { color: var(--blue); }
+  .domain-3 { background: #EEF0F3; }
+  .domain-3 .dm-icon { color: #5C6470; }
+  .domain-4 { background: var(--purple-soft); }
+  .domain-4 .dm-icon { color: var(--purple); }
+  .relation-box {
+    margin-top: 26px;
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 20px 24px;
+    font-size: 13.5px;
+    color: #4A4A50;
+    line-height: 1.7;
+  }
+  .relation-box b { color: var(--ink); font-weight: 800; margin-right: 6px; }
+
+  /* Slide 10: integrations */
+  .integ-card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .integ-icon {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .integ-icon.pink { background: var(--pink-soft); color: var(--pink); }
+  .integ-icon.blue { background: var(--blue-soft); color: var(--blue); }
+  .integ-card h4 { margin: 0 0 4px; font-size: 14.5px; font-weight: 700; }
+  .integ-card p { margin: 0; font-size: 12.5px; color: var(--sub); }
+
+  @media (max-width: 860px) {
+    .grid3, .grid4, .grid2, .mo-cols { grid-template-columns: 1fr; }
+    .flow-row { flex-direction: column; }
+    .flow-connector { display: none; }
+    section { padding: 40px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero" style="max-width:100%;">
+  <div class="circle c1"></div>
+  <div class="circle c2"></div>
+  <div class="hero-inner">
+    <h1>베스킨라빈스 키오스크 &amp;<br>관리자 시스템</h1>
+    <p>요구사항 정의서 발표</p>
+  </div>
+</section>
+
+<!-- Slide 2: 시스템 구성 -->
+<section>
+  <h2 class="eyebrow-title">시스템 구성</h2>
+  <div class="grid3">
+    <div class="sys-card pink">
+      <div class="sys-icon pink"><i class="fa-solid fa-desktop"></i></div>
+      <h3>PC 웹 키오스크</h3>
+      <div class="target pink">대상 : 매장 방문 고객</div>
+      <div class="desc">매장 내 화면에서 빠르게 주문·결제</div>
+      <hr>
+      <ul>
+        <li>상품 / 옵션 / 플레이버 선택</li>
+        <li>장바구니 관리</li>
+        <li>결제 · 대기번호 발급</li>
+      </ul>
+    </div>
+    <div class="sys-card blue">
+      <div class="sys-icon blue"><i class="fa-solid fa-mobile-screen"></i></div>
+      <h3>모바일웹 키오스크</h3>
+      <div class="target blue">대상 : 모바일 고객</div>
+      <div class="desc">작은 화면에서 동일 주문 플로우 제공</div>
+      <hr>
+      <ul>
+        <li>반응형 상품 선택</li>
+        <li>세로형 장바구니</li>
+        <li>체크 동의 후 완료 확인</li>
+      </ul>
+    </div>
+    <div class="sys-card green">
+      <div class="sys-icon green"><i class="fa-solid fa-user-shield"></i></div>
+      <h3>관리자 웹</h3>
+      <div class="target green">대상 : 본점 · 슈퍼 · 분점 관리자</div>
+      <div class="desc">분점 재고 신청 / 배송 / 운영 상태 관리</div>
+      <hr>
+      <ul>
+        <li>대시보드 · 재고 신청 승인 / 반려</li>
+        <li>재고 현황 · 배송 관리</li>
+        <li>분점 관리 · 통계 / 설정</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 3: 사용자 역할 -->
+<section>
+  <h2 class="eyebrow-title">사용자 역할</h2>
+  <div class="grid4">
+    <div class="role-card">
+      <div class="role-icon pink"><i class="fa-solid fa-user"></i></div>
+      <h3>고객</h3>
+      <div class="desc">키오스크에서 상품을 주문하고 결제하는 사용자</div>
+      <div class="scope-label pink">접근 범위</div>
+      <div class="scope-text">상품 목록·상세, 맛 선택, 장바구니, 결제, 대기번호</div>
+    </div>
+    <div class="role-card">
+      <div class="role-icon blue"><i class="fa-solid fa-store"></i></div>
+      <h3>분점 관리자</h3>
+      <div class="desc">특정 분점의 재고를 신청하고 배송/재고 상태 확인</div>
+      <div class="scope-label blue">접근 범위</div>
+      <div class="scope-text">자신의 분점 데이터 조회·신청·수정</div>
+    </div>
+    <div class="role-card">
+      <div class="role-icon green"><i class="fa-solid fa-building"></i></div>
+      <h3>본점 관리자</h3>
+      <div class="desc">여러 분점의 재고 신청과 배송을 관리</div>
+      <div class="scope-label green">접근 범위</div>
+      <div class="scope-text">전체 분점 재고 신청 조회, 승인/반려, 배송·분점 관리</div>
+    </div>
+    <div class="role-card">
+      <div class="role-icon purple"><i class="fa-solid fa-crown"></i></div>
+      <h3>슈퍼관리자</h3>
+      <div class="desc">시스템 설정과 관리자 계정 포함 전체 권한</div>
+      <div class="scope-label purple">접근 범위</div>
+      <div class="scope-text">전체 메뉴, 권한/코드/마스터 데이터 설정</div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 4: 키오스크 주문 흐름 -->
+<section>
+  <h2 class="eyebrow-title">키오스크 주문 흐름</h2>
+
+  <div class="flow-row">
+    <div class="flow-card pink-theme">
+      <div class="flow-top"><div class="flow-num pink">1</div><div class="flow-icon pink"><i class="fa-solid fa-cart-shopping"></i></div></div>
+      <h4>상품 카테고리 선택</h4>
+      <p>판매중지·품절 상품 선택 제한</p>
+      <div class="flow-connector pink">›</div>
+    </div>
+    <div class="flow-card pink-theme">
+      <div class="flow-top"><div class="flow-num pink">2</div><div class="flow-icon pink"><i class="fa-solid fa-gift"></i></div></div>
+      <h4>상품 상세 확인</h4>
+      <p>필수 옵션 미선택 시 다음 단계 제한</p>
+      <div class="flow-connector pink">›</div>
+    </div>
+    <div class="flow-card pink-theme">
+      <div class="flow-top"><div class="flow-num pink">3</div><div class="flow-icon pink"><i class="fa-solid fa-ice-cream"></i></div></div>
+      <h4>플레이버 선택</h4>
+      <p>허용 개수 초과 시 안내 메시지</p>
+      <div class="flow-connector pink">›</div>
+    </div>
+    <div class="flow-card pink-theme">
+      <div class="flow-top"><div class="flow-num pink">4</div><div class="flow-icon pink"><i class="fa-solid fa-bag-shopping"></i></div></div>
+      <h4>장바구니 담기</h4>
+      <p>옵션/맛 조합 기준 합산 또는 별도 행</p>
+      <div class="flow-connector pink">›</div>
+    </div>
+    <div class="flow-card pink-theme">
+      <div class="flow-top"><div class="flow-num pink">5</div><div class="flow-icon pink"><i class="fa-solid fa-clipboard-list"></i></div></div>
+      <h4>주문 내역 확인</h4>
+      <p>장바구니 비어있음 상태 처리</p>
+    </div>
+  </div>
+
+  <div class="flow-row">
+    <div class="flow-card pink-theme">
+      <div class="flow-top"><div class="flow-num pink">6</div><div class="flow-icon pink"><i class="fa-solid fa-credit-card"></i></div></div>
+      <h4>결제 방법 선택</h4>
+      <p>미선택 시 다음 단계 제한</p>
+      <div class="flow-connector pink">›</div>
+    </div>
+    <div class="flow-card pink-theme">
+      <div class="flow-top"><div class="flow-num pink">7</div><div class="flow-icon pink"><i class="fa-solid fa-ticket"></i></div></div>
+      <h4>포인트 / 할인 / 쿠폰</h4>
+      <p>중복 할인·최소 결제금액 검증</p>
+      <div class="flow-connector pink">›</div>
+    </div>
+    <div class="flow-card pink-theme">
+      <div class="flow-top"><div class="flow-num pink">8</div><div class="flow-icon pink"><i class="fa-solid fa-receipt"></i></div></div>
+      <h4>최종 결제</h4>
+      <p>PG/단말기 오류 시 재시도·취소</p>
+      <div class="flow-connector pink">›</div>
+    </div>
+    <div class="flow-card pink-theme">
+      <div class="flow-top"><div class="flow-num pink">9</div><div class="flow-icon pink"><i class="fa-solid fa-circle-check"></i></div></div>
+      <h4>결제 완료</h4>
+      <p>대기번호·안내 문구, 일정 시간 후 초기화면 복귀</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 5: 관리자 업무 흐름 -->
+<section>
+  <h2 class="eyebrow-title">관리자 업무 흐름</h2>
+
+  <div class="flow-row">
+    <div class="flow-card blue-theme">
+      <div class="flow-top"><div class="flow-num blue">1</div><div class="flow-icon blue"><i class="fa-solid fa-lock"></i></div></div>
+      <h4>로그인</h4>
+      <p>관리자 계정으로 로그인 후 권한에 따라 메뉴·데이터 범위 제한</p>
+      <div class="flow-connector blue">›</div>
+    </div>
+    <div class="flow-card blue-theme">
+      <div class="flow-top"><div class="flow-num blue">2</div><div class="flow-icon blue"><i class="fa-solid fa-chart-column"></i></div></div>
+      <h4>대시보드 확인</h4>
+      <p>전체 신청·처리 대기·배송 중·전체 분점 수 요약 지표 확인</p>
+      <div class="flow-connector blue">›</div>
+    </div>
+    <div class="flow-card blue-theme">
+      <div class="flow-top"><div class="flow-num blue">3</div><div class="flow-icon blue"><i class="fa-solid fa-inbox"></i></div></div>
+      <h4>재고 신청 처리</h4>
+      <p>분점 신청 내역 검색/필터링, 대기중 건 승인 또는 반려</p>
+    </div>
+  </div>
+  <div class="flow-row">
+    <div class="flow-card blue-theme">
+      <div class="flow-top"><div class="flow-num blue">4</div><div class="flow-icon blue"><i class="fa-solid fa-truck"></i></div></div>
+      <h4>배송 관리</h4>
+      <p>승인된 신청 건의 배송 상태 등록/추적, 분점에 상태 노출</p>
+      <div class="flow-connector blue">›</div>
+    </div>
+    <div class="flow-card blue-theme">
+      <div class="flow-top"><div class="flow-num blue">5</div><div class="flow-icon blue"><i class="fa-solid fa-shop"></i></div></div>
+      <h4>분점 관리</h4>
+      <p>분점 정보 등록/수정/상세 조회, 운영 상태 관리(정상/대기/중단)</p>
+      <div class="flow-connector blue">›</div>
+    </div>
+    <div class="flow-card blue-theme">
+      <div class="flow-top"><div class="flow-num blue">6</div><div class="flow-icon blue"><i class="fa-solid fa-chart-line"></i></div></div>
+      <h4>통계 / 설정</h4>
+      <p>신청량·재고 흐름·분점별 지표 확인, 코드/권한/알림 정책 관리</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 6: PC웹 키오스크 화면 구성 -->
+<section>
+  <h2 class="eyebrow-title">PC 웹 키오스크 화면 구성</h2>
+  <div class="grid4" style="margin-bottom:18px;">
+    <div class="step-card">
+      <div class="step-top"><div class="step-icon"><i class="fa-solid fa-cart-shopping"></i></div><div class="step-code">PC-01</div></div>
+      <h4>메뉴 / 상품 목록</h4>
+      <div class="step-foot">STEP 1 / 8</div>
+    </div>
+    <div class="step-card">
+      <div class="step-top"><div class="step-icon"><i class="fa-solid fa-gift"></i></div><div class="step-code">PC-02</div></div>
+      <h4>상품 상세 / 용기 선택</h4>
+      <div class="step-foot">STEP 2 / 8</div>
+    </div>
+    <div class="step-card">
+      <div class="step-top"><div class="step-icon"><i class="fa-solid fa-ice-cream"></i></div><div class="step-code">PC-03</div></div>
+      <h4>플레이버 선택</h4>
+      <div class="step-foot">STEP 3 / 8</div>
+    </div>
+    <div class="step-card">
+      <div class="step-top"><div class="step-icon"><i class="fa-solid fa-list-check"></i></div><div class="step-code">PC-04</div></div>
+      <h4>장바구니 / 주문 내역</h4>
+      <div class="step-foot">STEP 4 / 8</div>
+    </div>
+  </div>
+  <div class="grid4">
+    <div class="step-card">
+      <div class="step-top"><div class="step-icon"><i class="fa-solid fa-credit-card"></i></div><div class="step-code">PC-05</div></div>
+      <h4>결제 방법 선택</h4>
+      <div class="step-foot">STEP 5 / 8</div>
+    </div>
+    <div class="step-card">
+      <div class="step-top"><div class="step-icon"><i class="fa-solid fa-percent"></i></div><div class="step-code">PC-06</div></div>
+      <h4>포인트 / 할인 선택</h4>
+      <div class="step-foot">STEP 6 / 8</div>
+    </div>
+    <div class="step-card">
+      <div class="step-top"><div class="step-icon"><i class="fa-solid fa-receipt"></i></div><div class="step-code">PC-07</div></div>
+      <h4>쿠폰 / 최종 결제</h4>
+      <div class="step-foot">STEP 7 / 8</div>
+    </div>
+    <div class="step-card">
+      <div class="step-top"><div class="step-icon"><i class="fa-solid fa-circle-check"></i></div><div class="step-code">PC-08</div></div>
+      <h4>결제 완료</h4>
+      <div class="step-foot">STEP 8 / 8</div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 7: 모바일웹 키오스크 요구사항 -->
+<section>
+  <h2 class="eyebrow-title">모바일웹 키오스크 요구사항</h2>
+  <div class="mo-cols">
+    <div>
+      <div class="mo-col-title">화면 구성 (6개)</div>
+      <div class="mo-item"><div class="mo-sq"><i class="fa-solid fa-mobile-screen"></i></div><div><div class="mo-code">MO-01</div><h5>모바일 상품 목록</h5></div></div>
+      <div class="mo-item"><div class="mo-sq"><i class="fa-solid fa-gift"></i></div><div><div class="mo-code">MO-02</div><h5>상품 상세</h5></div></div>
+      <div class="mo-item"><div class="mo-sq"><i class="fa-solid fa-ice-cream"></i></div><div><div class="mo-code">MO-03</div><h5>플레이버 선택 / 담기</h5></div></div>
+      <div class="mo-item"><div class="mo-sq"><i class="fa-solid fa-bag-shopping"></i></div><div><div class="mo-code">MO-04</div><h5>장바구니 / 주문 확인</h5></div></div>
+      <div class="mo-item"><div class="mo-sq"><i class="fa-solid fa-credit-card"></i></div><div><div class="mo-code">MO-05</div><h5>결제 방법 / 할인 / 쿠폰</h5></div></div>
+      <div class="mo-item"><div class="mo-sq"><i class="fa-solid fa-circle-check"></i></div><div><div class="mo-code">MO-06</div><h5>결제 완료</h5></div></div>
+    </div>
+    <div>
+      <div class="mo-col-title">모바일 전용 검증 / 정책</div>
+      <div class="mo-item"><div class="mo-sq"><i class="fa-solid fa-globe"></i></div><div><div class="mo-req-label">지원 브라우저</div><p class="mo-req-desc">iOS Safari, Android Chrome 우선 지원</p></div></div>
+      <div class="mo-item"><div class="mo-sq"><i class="fa-solid fa-arrows-left-right"></i></div><div><div class="mo-req-label">화면 폭</div><p class="mo-req-desc">최소 375px 폭에서도 주요 버튼이 잘리지 않아야 함</p></div></div>
+      <div class="mo-item"><div class="mo-sq"><i class="fa-solid fa-rotate-left"></i></div><div><div class="mo-req-label">브라우저 뒤로가기</div><p class="mo-req-desc">주문 데이터 유실 방지 위한 상태 보존 정책 필요</p></div></div>
+      <div class="mo-item"><div class="mo-sq"><i class="fa-solid fa-door-open"></i></div><div><div class="mo-req-label">결제 이탈</div><p class="mo-req-desc">외부 앱/페이지 이동 후 복귀 시 주문 상태 재조회</p></div></div>
+      <div class="mo-item"><div class="mo-sq"><i class="fa-solid fa-hand-pointer"></i></div><div><div class="mo-req-label">터치 중복 방지</div><p class="mo-req-desc">담기/결제 버튼 클릭 후 로딩 상태로 전환</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 8: 관리자 웹 & 권한 매트릭스 -->
+<section>
+  <h2 class="eyebrow-title">관리자 웹 &amp; 권한 매트릭스</h2>
+  <div style="font-size:13px; font-weight:800; color:var(--green); margin-bottom:14px;">화면 구성 (8개)</div>
+  <div class="grid4" style="margin-bottom:10px;">
+    <div class="step-card green-theme"><div class="step-top"><div class="step-code green">AD-01</div></div><h4 style="margin-bottom:0;">공통 레이아웃</h4></div>
+    <div class="step-card green-theme"><div class="step-top"><div class="step-code green">AD-02</div></div><h4 style="margin-bottom:0;">대시보드</h4></div>
+    <div class="step-card green-theme"><div class="step-top"><div class="step-code green">AD-03</div></div><h4 style="margin-bottom:0;">재고 신청</h4></div>
+    <div class="step-card green-theme"><div class="step-top"><div class="step-code green">AD-04</div></div><h4 style="margin-bottom:0;">재고 현황</h4></div>
+  </div>
+  <div class="grid4">
+    <div class="step-card green-theme"><div class="step-top"><div class="step-code green">AD-05</div></div><h4 style="margin-bottom:0;">배송 관리</h4></div>
+    <div class="step-card green-theme"><div class="step-top"><div class="step-code green">AD-06</div></div><h4 style="margin-bottom:0;">분점 관리</h4></div>
+    <div class="step-card green-theme"><div class="step-top"><div class="step-code green">AD-07</div></div><h4 style="margin-bottom:0;">통계 / 리포트</h4></div>
+    <div class="step-card green-theme"><div class="step-top"><div class="step-code green">AD-08</div></div><h4 style="margin-bottom:0;">설정</h4></div>
+  </div>
+
+  <div style="font-size:13px; font-weight:800; color:var(--table-navy); margin:36px 0 4px;">관리자 권한 매트릭스</div>
+  <table class="matrix">
+    <tr><th>기능</th><th>슈퍼</th><th>본점</th><th>분점</th></tr>
+    <tr><td>대시보드 전체 조회</td><td class="pill-ok">가능</td><td class="pill-ok">가능</td><td class="pill-limited">제한</td></tr>
+    <tr><td>재고 신청 승인/반려</td><td class="pill-ok">가능</td><td class="pill-ok">가능</td><td class="pill-no">불가</td></tr>
+    <tr><td>재고 신청 등록</td><td class="pill-ok">가능</td><td class="pill-ok">가능</td><td class="pill-ok">가능</td></tr>
+    <tr><td>배송 상태 변경</td><td class="pill-ok">가능</td><td class="pill-ok">가능</td><td class="pill-no">불가</td></tr>
+    <tr><td>분점 등록/수정</td><td class="pill-ok">가능</td><td class="pill-ok">가능</td><td class="pill-no">불가</td></tr>
+    <tr><td>상품/가격 설정</td><td class="pill-ok">가능</td><td class="pill-limited">제한</td><td class="pill-no">불가</td></tr>
+    <tr><td>관리자 계정 관리</td><td class="pill-ok">가능</td><td class="pill-limited">제한</td><td class="pill-no">불가</td></tr>
+  </table>
+</section>
+
+<!-- Slide 9: 데이터 모델 개요 -->
+<section>
+  <h2 class="eyebrow-title">데이터 모델 개요</h2>
+  <div class="grid4">
+    <div class="domain-card domain-1">
+      <div class="dm-icon"><i class="fa-solid fa-ice-cream"></i></div>
+      <h4>상품 마스터</h4>
+      <p>카테고리 · 상품 · 사이즈 옵션 · 플레이버 · 이벤트/할인</p>
+    </div>
+    <div class="domain-card domain-2">
+      <div class="dm-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+      <h4>주문 / 결제</h4>
+      <p>고객 · 주문 · 주문상품 · 주문 플레이버 · 결제 · 포인트 이력</p>
+    </div>
+    <div class="domain-card domain-3">
+      <div class="dm-icon"><i class="fa-solid fa-shop"></i></div>
+      <h4>매장 / 권한</h4>
+      <p>매장 · 관리자 계정 · 매장 상태 이력</p>
+    </div>
+    <div class="domain-card domain-4">
+      <div class="dm-icon"><i class="fa-solid fa-box"></i></div>
+      <h4>재고 신청 / 배송</h4>
+      <p>재고 · 재고 신청/상세 · 배송 · 배송 상태 이력 · 재고 입출고/조정</p>
+    </div>
+  </div>
+  <div class="relation-box">
+    <b>관계 요약</b>주문 1건은 여러 주문상품을, 주문상품 1개는 여러 플레이버를 가질 수 있음. 분점은 자기 매장의 재고 신청만 등록·조회하며, 본점이 승인·반려·배송을 처리함. 재고는 매장·상품/플레이버별로 관리하고 입출고·조정 이력을 남김.
+  </div>
+</section>
+
+<!-- Slide 10: 외부 연동 요구사항 -->
+<section>
+  <h2 class="eyebrow-title">외부 연동 요구사항</h2>
+  <div class="grid2">
+    <div class="integ-card"><div class="integ-icon pink"><i class="fa-solid fa-credit-card"></i></div><div><h4>결제 PG/카드 단말기</h4><p>신용카드·간편결제·계좌이체 결제 요청 및 승인/취소</p></div></div>
+    <div class="integ-card"><div class="integ-icon blue"><i class="fa-solid fa-money-bill-wave"></i></div><div><h4>현금 결제 장치</h4><p>현금 투입, 거스름돈, 결제 완료 결과 수신</p></div></div>
+    <div class="integ-card"><div class="integ-icon pink"><i class="fa-solid fa-star"></i></div><div><h4>해피포인트</h4><p>회원 조회, 포인트 적립/사용, 사용 가능 포인트 조회</p></div></div>
+    <div class="integ-card"><div class="integ-icon blue"><i class="fa-solid fa-tags"></i></div><div><h4>제휴 할인</h4><p>KT/카드사 등 제휴 할인 조회 및 적용</p></div></div>
+    <div class="integ-card"><div class="integ-icon pink"><i class="fa-solid fa-ticket"></i></div><div><h4>모바일 상품권/쿠폰</h4><p>쿠폰 번호 입력 또는 바코드/QR 스캔, 유효성 검증</p></div></div>
+    <div class="integ-card"><div class="integ-icon blue"><i class="fa-solid fa-receipt"></i></div><div><h4>영수증/주문서 프린터</h4><p>결제 완료 후 영수증 또는 제조 주문서 출력</p></div></div>
+    <div class="integ-card"><div class="integ-icon pink"><i class="fa-solid fa-bell"></i></div><div><h4>알림 발송</h4><p>재고 신청 승인/반려, 배송 상태 변경 알림</p></div></div>
+    <div class="integ-card"><div class="integ-icon blue"><i class="fa-solid fa-sitemap"></i></div><div><h4>POS/KDS/제조 시스템</h4><p>주문 완료 건을 매장 제조 화면 또는 POS로 전달</p></div></div>
+  </div>
+</section>
+
+</body>
+</html>
