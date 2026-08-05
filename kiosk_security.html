@@ -1,0 +1,945 @@
+<title>로그인·업로드 보안 기능 리스트</title>
+<style>
+  :root {
+    --paper: #f4f3fb;
+    --surface: #ffffff;
+    --surface-2: #ececf7;
+    --ink: #18162a;
+    --ink-dim: #5a5770;
+    --ink-faint: #8a86a3;
+    --line: #e2dff0;
+    --accent: #453adb;
+    --accent-soft: #eceafc;
+    --danger: #b3261e;
+    --danger-soft: #fbeae9;
+    --danger-border: #f0c9c6;
+    --good: #0b7d68;
+    --good-soft: #e5f5f1;
+    --good-border: #bfe4da;
+    --warn: #9a5b0a;
+    --warn-soft: #fbf0dd;
+    --warn-border: #f0ddb3;
+    --code-bg: #15132a;
+    --code-text: #e8e6f5;
+    --code-border: #2c2748;
+    --code-comment: #9089b8;
+    --code-string: #ffcf87;
+    --code-key: #8fc3ff;
+    --shadow: 0 1px 2px rgba(24,22,42,.05), 0 8px 24px rgba(24,22,42,.07);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0e0c1a;
+      --surface: #17142a;
+      --surface-2: #1d1a33;
+      --ink: #ece9f8;
+      --ink-dim: #b0abc9;
+      --ink-faint: #7c7796;
+      --line: #2c2748;
+      --accent: #a89bff;
+      --accent-soft: #241f42;
+      --danger: #ff8a80;
+      --danger-soft: #2e1616;
+      --danger-border: #4a231f;
+      --good: #4fd6b8;
+      --good-soft: #102621;
+      --good-border: #1b4038;
+      --warn: #f5b84d;
+      --warn-soft: #3a2c10;
+      --warn-border: #5c451c;
+      --code-bg: #0b0a16;
+      --code-text: #e8e6f5;
+      --code-border: #241f42;
+      --code-comment: #8b84ac;
+      --shadow: 0 1px 2px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0e0c1a; --surface: #17142a; --surface-2: #1d1a33; --ink: #ece9f8;
+    --ink-dim: #b0abc9; --ink-faint: #7c7796; --line: #2c2748; --accent: #a89bff;
+    --accent-soft: #241f42; --danger: #ff8a80; --danger-soft: #2e1616; --danger-border: #4a231f;
+    --good: #4fd6b8; --good-soft: #102621; --good-border: #1b4038;
+    --warn: #f5b84d; --warn-soft: #3a2c10; --warn-border: #5c451c;
+    --code-bg: #0b0a16; --code-text: #e8e6f5; --code-border: #241f42; --code-comment: #8b84ac;
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.45);
+  }
+  :root[data-theme="light"] {
+    --paper: #f4f3fb; --surface: #ffffff; --surface-2: #ececf7; --ink: #18162a;
+    --ink-dim: #5a5770; --ink-faint: #8a86a3; --line: #e2dff0; --accent: #453adb;
+    --accent-soft: #eceafc; --danger: #b3261e; --danger-soft: #fbeae9; --danger-border: #f0c9c6;
+    --good: #0b7d68; --good-soft: #e5f5f1; --good-border: #bfe4da;
+    --warn: #9a5b0a; --warn-soft: #fbf0dd; --warn-border: #f0ddb3;
+    --code-bg: #15132a; --code-text: #e8e6f5; --code-border: #2c2748; --code-comment: #9089b8;
+    --shadow: 0 1px 2px rgba(24,22,42,.05), 0 8px 24px rgba(24,22,42,.07);
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: var(--paper); color: var(--ink);
+    font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { max-width: 100%; overflow-x: hidden; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .mono {
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+
+  .page { max-width: 900px; margin: 0 auto; padding: 56px 24px 120px; }
+
+  /* ---------- Header ---------- */
+  .masthead { display: flex; flex-direction: column; gap: 18px; margin-bottom: 40px; }
+  .eyebrow {
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700;
+  }
+  h1 {
+    font-size: clamp(27px, 4.3vw, 38px); line-height: 1.2; margin: 0;
+    font-weight: 800; letter-spacing: -0.015em; text-wrap: balance;
+  }
+  .subtitle { font-size: 16px; color: var(--ink-dim); line-height: 1.68; margin: 0; max-width: 64ch; }
+
+  .summary-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+  .summary-card {
+    flex: 1 1 140px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow);
+  }
+  .summary-num {
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums; font-size: 24px; font-weight: 800; color: var(--accent);
+    line-height: 1;
+  }
+  .summary-num.warn { color: var(--warn); }
+  .summary-label { font-size: 12.5px; color: var(--ink-dim); margin-top: 6px; }
+
+  /* ---------- Table of contents ---------- */
+  .toc { display: flex; flex-direction: column; gap: 4px; margin: 8px 0 0; border-top: 1px solid var(--line); padding-top: 16px; }
+  .toc a {
+    display: flex; align-items: baseline; gap: 10px; text-decoration: none;
+    color: var(--ink-dim); font-size: 13.5px; padding: 5px 0;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc .toc-num {
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    color: var(--ink-faint); font-size: 12px; flex: none; width: 20px;
+  }
+
+  /* ---------- Feature card ---------- */
+  .feature { margin-top: 56px; border-top: 1px solid var(--line); padding-top: 40px; }
+  .feature:first-of-type { margin-top: 40px; }
+  .feature-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 6px; }
+  .feature-num {
+    flex: none; width: 34px; height: 34px; border-radius: 9px;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 700; font-size: 14px;
+  }
+  .feature-titles { flex: 1; min-width: 0; }
+  h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; margin: 0 0 4px; text-wrap: balance; }
+  .feature-where { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .loc-tag {
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; color: var(--ink-dim); background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: 5px; padding: 3px 8px;
+  }
+
+  h3 { font-size: 15.5px; font-weight: 700; margin: 30px 0 4px; letter-spacing: -0.005em; }
+  h3:first-of-type { margin-top: 20px; }
+  p.dim { color: var(--ink-dim); font-size: 14px; line-height: 1.75; max-width: 64ch; margin: 6px 0 0; }
+
+  .panel { margin-top: 18px; border-radius: 12px; padding: 18px 20px; border: 1px solid; }
+  .panel.problem { background: var(--danger-soft); border-color: var(--danger-border); }
+  .panel.solution { background: var(--good-soft); border-color: var(--good-border); }
+  .panel-label {
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 800;
+    display: flex; align-items: center; gap: 7px; margin-bottom: 10px;
+  }
+  .panel.problem .panel-label { color: var(--danger); }
+  .panel.solution .panel-label { color: var(--good); }
+  .panel-label .sw { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+
+  .panel p { margin: 0; font-size: 14.5px; line-height: 1.78; color: var(--ink); max-width: none; }
+  .panel .analysis { color: var(--ink-dim); font-size: 14px; margin-top: 8px; }
+  .panel ul { margin: 10px 0 0; padding-left: 20px; font-size: 14px; line-height: 1.75; }
+  .panel li { margin-bottom: 5px; }
+  .panel li::marker { color: currentColor; }
+  .panel.problem li::marker { color: var(--danger); }
+  .panel.solution li::marker { color: var(--good); }
+
+  code.inline {
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 5px; padding: 1.5px 6px; font-size: 13px; color: var(--accent);
+    word-break: break-word;
+  }
+  .panel.problem code.inline, .panel.solution code.inline { background: var(--surface); }
+
+  /* ---------- File card / code block (shared by every code sample) ---------- */
+  .file-card {
+    margin: 14px 0 18px; border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--code-border); box-shadow: var(--shadow);
+  }
+  .file-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--surface-2); border-bottom: 1px solid var(--line);
+    padding: 8px 13px; font-size: 12px;
+  }
+  .file-path {
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    color: var(--ink-dim); overflow-x: auto; white-space: nowrap;
+  }
+  .file-tag {
+    flex: none; font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: 3px 7px;
+  }
+  .file-card pre {
+    margin: 0; background: var(--code-bg); color: var(--code-text);
+    padding: 14px 16px; overflow-x: auto; font-size: 12.5px; line-height: 1.68;
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  }
+  .file-card pre code { white-space: pre; }
+  .c { color: var(--code-comment); }
+  .s { color: var(--code-string); }
+  .k { color: var(--code-key); }
+
+  /* ---------- Callout ---------- */
+  .callout {
+    margin: 20px 0 8px; border-radius: 10px; padding: 16px 20px;
+    background: var(--accent-soft); border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+  }
+  .callout.warn { background: var(--warn-soft); border-left-color: var(--warn); }
+  .callout .callout-label {
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin-bottom: 8px; display: block;
+  }
+  .callout.warn .callout-label { color: var(--warn); }
+  .callout p { margin: 0; font-size: 14px; max-width: none; line-height: 1.72; }
+  .callout p + p { margin-top: 10px; }
+
+  /* ---------- Key table ---------- */
+  .key-table { width: 100%; border-collapse: collapse; margin: 0; font-size: 13px; }
+  .key-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); margin-top: 14px; }
+  .key-table th, .key-table td { text-align: left; padding: 9px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .key-table th {
+    background: var(--surface-2); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-faint); font-weight: 700;
+  }
+  .key-table tr:last-child td { border-bottom: none; }
+  .key-table td.key { font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace; color: var(--accent); white-space: nowrap; }
+  .key-table td.desc { color: var(--ink-dim); }
+  .key-table tr.highlight td { background: var(--accent-soft); }
+  .key-table tr.highlight td.key { color: var(--accent); font-weight: 700; }
+
+  /* ---------- Step flow (used for the Turnstile sequence AND the overall flow) ---------- */
+  .flow-list { margin-top: 20px; }
+  .flow-item { display: flex; gap: 16px; }
+  .flow-rail { display: flex; flex-direction: column; align-items: center; flex: 0 0 34px; }
+  .flow-dot {
+    width: 34px; height: 34px; border-radius: 50%; flex: none;
+    background: var(--surface); border: 2px solid var(--accent); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 700; font-size: 13px;
+  }
+  .flow-dot.branch { border-color: var(--danger); color: var(--danger); }
+  .flow-line { width: 2px; flex: 1; background: var(--line); margin: 4px 0; min-height: 12px; }
+  .flow-item:last-child .flow-line { display: none; }
+  .flow-content { flex: 1; min-width: 0; padding-bottom: 24px; }
+  .flow-title { font-weight: 700; font-size: 14.5px; margin: 0 0 4px; }
+  .flow-desc { color: var(--ink-dim); font-size: 13.5px; line-height: 1.72; margin: 0; max-width: 62ch; }
+  .flow-tag {
+    display: inline-block; margin-top: 7px;
+    font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px; letter-spacing: .05em; color: var(--ink-faint);
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px;
+  }
+
+  /* ---------- Checklist ---------- */
+  .task-list { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+  .task {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; box-shadow: var(--shadow);
+  }
+  .task-mark {
+    flex: none; width: 22px; height: 22px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--warn-soft); color: var(--warn); font-size: 13px; margin-top: 1px;
+  }
+  .task-mark.good { background: var(--good-soft); color: var(--good); }
+  .task-mark.critical { background: var(--danger-soft); color: var(--danger); }
+  .task-body { display: flex; flex-direction: column; gap: 3px; }
+  .task-title { font-weight: 700; font-size: 14.5px; }
+  .task-desc { color: var(--ink-dim); font-size: 13.5px; line-height: 1.65; max-width: 62ch; }
+
+  hr.rule { border: none; border-top: 1px solid var(--line); margin: 64px 0 0; }
+  .footer-note { margin-top: 20px; font-size: 13px; color: var(--ink-faint); line-height: 1.7; }
+
+  @media (max-width: 560px) {
+    .page { padding: 40px 16px 90px; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <span class="eyebrow">보안 문서 통합 · kiosk / branch-login</span>
+    <h1>로그인·업로드 보안 기능 리스트</h1>
+    <p class="subtitle">본사·지점 통합 로그인 흐름(<code class="inline">BranchLoginView.vue</code>)과 HQ 이미지 업로드에 적용된 보안 조치 6가지를 문제 사항 → 분석 → 해결 방안 순으로 정리했다. 01~05는 로그인 요청 하나가 실행되는 순서 그대로 배치했고(IP 요청 제한 → Turnstile → 자격증명·토큰 검증), 06은 별도 흐름인 HQ 상품/맛 이미지 업로드의 경로 탐색(Path Traversal) 방지를 다룬다. <code class="inline">보안 기능 리스트.html</code>·<code class="inline">Turnstile 연동 노트.html</code>·<code class="inline">feature/LoginLimitFilter</code> 브랜치 코드를 통합한 뒤, 다운로드에 있던 <code class="inline">2차프로젝트 적용 보안사항.txt</code>(SQL Injection·Path Traversal·데이터 검증·HTTPS 등 일반 체크리스트) 기준으로 실제 코드를 다시 훑어 빠진 부분을 <a href="#status">운영 전환 전 확인 사항</a>에 추가했다 — 이 과정에서 Turnstile 관련 코드가 문서 작성 이후 리팩터링되며 생긴 차이도 함께 바로잡았다.</p>
+    <div class="summary-row">
+      <div class="summary-card"><div class="summary-num">6</div><div class="summary-label">보안 기능</div></div>
+      <div class="summary-card"><div class="summary-num">3</div><div class="summary-label">로그인 경로 (본사 / 지점-Firebase / 지점-DB)</div></div>
+      <div class="summary-card"><div class="summary-num">17</div><div class="summary-label">관련 파일</div></div>
+      <div class="summary-card"><div class="summary-num warn">6</div><div class="summary-label">운영 전환 전 확인 필요 (긴급 1)</div></div>
+    </div>
+    <nav class="toc">
+      <a href="#f1"><span class="toc-num">01</span>로그인 시도 제한 — IP 기준 Rate Limit</a>
+      <a href="#f2"><span class="toc-num">02</span>Turnstile 캡차 — 사람인지 검증</a>
+      <a href="#f3"><span class="toc-num">03</span>비밀번호 자격증명 검증</a>
+      <a href="#f4"><span class="toc-num">04</span>토큰 서명·만료 검증</a>
+      <a href="#f5"><span class="toc-num">05</span>Firebase ID 토큰 검증</a>
+      <a href="#f6"><span class="toc-num">06</span>이미지 업로드 — 경로 탐색(Path Traversal) 방지</a>
+      <a href="#flow"><span class="toc-num">＋</span>전체 보안 처리 플로우</a>
+      <a href="#status"><span class="toc-num">＋</span>운영 전환 전 확인 사항</a>
+    </nav>
+  </header>
+
+  <!-- 01 -->
+  <section class="feature" id="f1">
+    <div class="feature-head">
+      <div class="feature-num">01</div>
+      <div class="feature-titles">
+        <h2>로그인 시도 제한 — IP 기준 Rate Limit</h2>
+        <div class="feature-where">
+          <span class="loc-tag">LoginRateLimitFilter.java</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel problem">
+      <div class="panel-label"><span class="sw"></span>문제 사항</div>
+      <p>Turnstile을 한 번 통과한 뒤에도, 같은 사람(또는 같은 세션)이 로그인 API 자체는 무제한으로 반복 호출할 수 있었다.</p>
+      <p class="analysis"><strong>문제 사항 분석</strong> — Turnstile은 "이 요청을 사람이 보냈는가"만 판별할 뿐, 그 사람이 같은 아이디에 비밀번호를 계속 바꿔가며 넣어보는 것까지는 막지 못한다. 로그인 API(<code class="inline">/api/hq-auth/login</code>, <code class="inline">/api/branch-auth/db-login</code>, <code class="inline">/api/branch-auth/firebase-session</code>) 자체에는 시도 횟수 제한이 전혀 없었다.</p>
+      <ul>
+        <li>Turnstile 통과 이후에도 무차별 대입(brute-force)이 계속 가능</li>
+        <li>계정 단위 잠금 없이, 같은 IP에서 짧은 시간에 쏟아지는 요청 자체를 걸러낼 장치가 없었음</li>
+      </ul>
+    </div>
+
+    <div class="panel solution">
+      <div class="panel-label"><span class="sw"></span>해결 방안</div>
+      <p>서블릿 필터 하나(<code class="inline">LoginRateLimitFilter</code>)로 로그인류 POST 엔드포인트 3개를 클라이언트 IP 기준 <strong>5분당 10회</strong>로 제한한다. 컨트롤러·로그인 서비스보다 앞단에서 걸러지므로, 임계치를 넘으면 Turnstile 검증이나 비밀번호 대조까지 갈 필요도 없이 즉시 차단된다.</p>
+      <ul>
+        <li><code class="inline">ConcurrentHashMap&lt;IP, AtomicReference&lt;Window&gt;&gt;</code>로 인메모리 카운팅 — DB나 별도 캐시 없이 <code class="inline">updateAndGet</code>으로 원자적으로 증가·리셋</li>
+        <li>5분 윈도우 안에서 <strong>11번째 요청부터</strong> HTTP 429 + <code class="inline">{"message":"요청이 너무 많습니다. 잠시 후 다시 시도해주세요."}</code> 응답</li>
+        <li><code class="inline">@Component</code>로 등록된 <code class="inline">Filter</code> 빈을 Spring Boot가 서블릿 컨테이너에 자동 등록 — <code class="inline">SecurityConfig</code>에 별도 설정을 추가할 필요가 없음</li>
+      </ul>
+      <div class="file-card">
+        <div class="file-bar"><span class="file-path">backend/.../global/security/LoginRateLimitFilter.java</span><span class="file-tag">Java</span></div>
+        <pre><code><span class="k">private static final</span> Set&lt;String&gt; LIMITED_PATHS = Set.of(
+    <span class="s">"/api/hq-auth/login"</span>,
+    <span class="s">"/api/branch-auth/db-login"</span>,
+    <span class="s">"/api/branch-auth/firebase-session"</span>
+);
+<span class="k">private static final int</span> MAX_ATTEMPTS = 10;
+<span class="k">private static final</span> Duration WINDOW = Duration.ofMinutes(5);
+
+<span class="k">private record</span> Window(int count, Instant resetAt) {}
+
+<span class="c">// IP별로 윈도를 원자적으로 갱신 — 윈도가 지났으면 1로 리셋, 아니면 +1</span>
+Window updated = ref.updateAndGet(w -&gt; Instant.now().isAfter(w.resetAt())
+    ? <span class="k">new</span> Window(1, Instant.now().plus(WINDOW))
+    : <span class="k">new</span> Window(w.count() + 1, w.resetAt()));
+
+<span class="k">if</span> (updated.count() &gt; MAX_ATTEMPTS) {
+  response.setStatus(429);
+  response.getWriter().write(<span class="s">"{\"message\":\"요청이 너무 많습니다. 잠시 후 다시 시도해주세요.\"}"</span>);
+  <span class="k">return</span>;
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="key-table-wrap">
+      <table class="key-table">
+        <thead>
+          <tr><th>경로</th><th>컨트롤러</th><th>서비스</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="key">POST /api/hq-auth/login</td>
+            <td class="desc">HqAuthController</td>
+            <td class="desc">HqAuthService.login</td>
+          </tr>
+          <tr>
+            <td class="key">POST /api/branch-auth/db-login</td>
+            <td class="desc">BranchFallbackLoginController</td>
+            <td class="desc">BranchFallbackLoginService.login</td>
+          </tr>
+          <tr>
+            <td class="key">POST /api/branch-auth/firebase-session</td>
+            <td class="desc">BranchAuthController</td>
+            <td class="desc">BranchAuthService.firebaseSession</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-label">현재 구현의 제약</span>
+      <p>계정이 아니라 <strong>IP 단위</strong>로만 제한한다 — 같은 매장 공유기 뒤에 여러 키오스크가 물려 있을 수 있어 매장 전체가 한 번에 묶이지 않도록 임계치를 넉넉하게(5분당 10회) 잡았지만, 반대로 특정 계정만 노려 낮은 빈도로 시도하는 공격은 막지 못한다.</p>
+      <p>카운터가 <strong>인메모리</strong>(<code class="inline">ConcurrentHashMap</code>)라 앱을 재시작하면 초기화되고, 인스턴스를 여러 대 띄우면 인스턴스별로 따로 카운트된다. IP도 <code class="inline">request.getRemoteAddr()</code>를 그대로 쓰기 때문에, 리버스 프록시 뒤에 배포한다면 프록시 IP로 요청이 뭉치지 않도록 <code class="inline">X-Forwarded-For</code> 처리가 추가로 필요하다.</p>
+      <p>프론트엔드에는 429를 따로 구분해 처리하는 코드가 없다 — <code class="inline">BranchLoginView.vue</code>는 이 응답도 다른 로그인 실패와 동일하게 <code class="inline">error.response.data.message</code>로 표시하고 Turnstile 위젯을 리셋한다. 실제로는 토큰을 소모한 게 아니라서 위젯을 되돌릴 필요는 없지만, 공통 에러 처리 경로를 그대로 타면서 생기는 사소한 부정확함이다.</p>
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section class="feature" id="f2">
+    <div class="feature-head">
+      <div class="feature-num">02</div>
+      <div class="feature-titles">
+        <h2>Turnstile 캡차 — 사람인지 검증</h2>
+        <div class="feature-where">
+          <span class="loc-tag">BranchLoginView.vue</span>
+          <span class="loc-tag">TurnstileVerifier.java</span>
+          <span class="loc-tag">HqAuthService.java</span>
+          <span class="loc-tag">BranchAuthService.java</span>
+          <span class="loc-tag">BranchFallbackLoginService.java</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel problem">
+      <div class="panel-label"><span class="sw"></span>문제 사항</div>
+      <p>로그인 API가 자동화된 요청에 그대로 노출되어 있었다.</p>
+      <p class="analysis"><strong>문제 사항 분석</strong> — 로그인 폼은 아이디·비밀번호 형식만 확인할 뿐, "이 요청을 사람이 보냈는가"를 확인하는 절차가 전혀 없었다. 브라우저를 거치지 않고 API를 직접 호출해도 동일하게 처리되는 구조였다.</p>
+      <ul>
+        <li>무차별 대입(brute-force): 비밀번호 조합을 자동으로 반복 시도할 수 있음</li>
+        <li>자격증명 스터핑(credential stuffing): 다른 서비스에서 유출된 아이디·비밀번호 목록을 대량으로 대입 가능</li>
+        <li>클라이언트(JS) 레벨 검증만으로는 위조 가능 — 서버가 직접 확인하지 않으면 신뢰할 수 없음</li>
+      </ul>
+    </div>
+
+    <div class="panel solution">
+      <div class="panel-label"><span class="sw"></span>해결 방안</div>
+      <p>Cloudflare Turnstile을 붙여, 로그인 API가 실제 인증(비밀번호/Firebase 토큰 검증)을 수행하기 전에 서버가 "사람인지"를 직접 재확인하도록 만들었다.</p>
+      <ul>
+        <li>위젯이 발급한 토큰을 프론트가 각 로그인 요청 본문에 <code class="inline">turnstileToken</code> 필드로 실어 백엔드로 전달</li>
+        <li><code class="inline">TurnstileVerifier</code>가 그 토큰을 들고 Cloudflare 서버에 <code class="inline">siteverify</code>로 재검증 (서버-서버 통신이라 위조 불가)</li>
+        <li><code class="inline">HqAuthService.login()</code> / <code class="inline">BranchAuthService.firebaseSession()</code> 각각의 첫 줄에서 실제 인증 로직 이전에 호출</li>
+        <li>검증 실패 시 위젯을 리셋해 사용자가 다시 시도할 수 있게 처리</li>
+      </ul>
+    </div>
+
+    <h3>구현 상세 — 5단계 흐름</h3>
+    <p class="dim">캡차는 "이 요청을 사람이 보냈는가"를 확인하는 절차다. 자바스크립트가 하는 판단은 위조하기 쉬우므로, <strong>반드시 서버가 Cloudflare 서버에 직접 물어봐야</strong> 신뢰할 수 있다.</p>
+    <div class="flow-list">
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot">1</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <p class="flow-title">위젯이 그려진다</p>
+          <p class="flow-desc">로그인 화면이 마운트되면 <code class="inline">BranchLoginView.vue</code>가 Cloudflare 스크립트를 직접 <code class="inline">&lt;head&gt;</code>에 주입하고, 로드가 끝나면 <code class="inline">window.turnstile.render()</code>로 위젯을 그린다. 사용자는 체크박스를 누르거나, 위험도가 낮다고 판단되면 자동으로 통과된다.</p>
+          <span class="flow-tag">브라우저 · BranchLoginView.vue</span>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot">2</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <p class="flow-title">토큰이 발급된다</p>
+          <p class="flow-desc">통과하면 위젯이 긴 문자열 토큰을 <code class="inline">callback</code>으로 넘겨주고, <code class="inline">turnstileToken</code> 상태에 저장된다.</p>
+          <span class="flow-tag">브라우저 · BranchLoginView.vue</span>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot">3</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <p class="flow-title">토큰을 로그인 요청에 실어 보낸다</p>
+          <p class="flow-desc">별도의 사전 검증 API 없이, <code class="inline">/hq-auth/login</code> · <code class="inline">/branch-auth/firebase-session</code> · <code class="inline">/branch-auth/db-login</code> 요청 본문에 <code class="inline">turnstileToken</code>을 그대로 함께 담아 보낸다.</p>
+          <span class="flow-tag">프론트 → 백엔드 · BranchLoginView.vue</span>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot">4</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <p class="flow-title">서버가 Cloudflare에 되묻는다</p>
+          <p class="flow-desc">각 로그인 서비스 메서드의 첫 줄에서 <code class="inline">TurnstileVerifier.verify(token)</code>이 비밀키 + 받은 토큰을 Cloudflare의 <code class="inline">siteverify</code> API로 서버-서버 통신한다. 이 단계가 신뢰의 핵심이다.</p>
+          <span class="flow-tag">백엔드 → Cloudflare · TurnstileVerifier.java</span>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot">5</div></div>
+        <div class="flow-content">
+          <p class="flow-title">통과/거절을 로그인 흐름에 반영한다</p>
+          <p class="flow-desc">검증에 실패하면 <code class="inline">IllegalArgumentException</code>이 던져져 실제 인증 로직(비밀번호 대조 등)까지 가지 않고 즉시 끝난다. 프론트는 실패 시 위젯을 리셋하고 에러 메시지를 띄운다.</p>
+          <span class="flow-tag">백엔드 응답 → 프론트</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>프론트엔드</h3>
+    <div class="file-card">
+      <div class="file-bar"><span class="file-path">frontend/src/views/branch/BranchLoginView.vue</span><span class="file-tag">Vue</span></div>
+      <pre><code><span class="c">// data-sitekey(implicit) 방식은 api.js 로드 시점에 페이지를 한 번만 스캔하므로,
+// SPA 라우팅으로 이 화면에 다시 들어오면 위젯이 안 뜬다 - 그래서 마운트마다 명시적으로 render()를 호출한다</span>
+<span class="k">function</span> renderTurnstile() {
+  widgetId = window.turnstile.render(turnstileEl.value, {
+    sitekey: TURNSTILE_SITE_KEY,
+    callback: (token) =&gt; { turnstileToken.value = token },
+    <span class="s">'expired-callback'</span>: () =&gt; { turnstileToken.value = <span class="s">''</span> }
+  })
+}
+
+<span class="c">// 토큰은 로그인 시도 루프 밖에서 한 번만 만들어지고, 시도할 때마다 요청 본문에 그대로 실린다</span>
+<span class="k">const</span> attempts = loginId.value.includes(<span class="s">'@'</span>)
+  ? [loginAsHq, loginWithFirebase]
+  : [loginAsHq, loginWithDb]
+
+<span class="k">await</span> http.post(<span class="s">'/hq-auth/login'</span>, { loginId: loginId.value, password: password.value, turnstileToken: turnstileToken.value })</code></pre>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-label">토큰 재사용 문제가 다시 나타날 수 있는 구조</span>
+      <p>이 로그인 폼은 아이디 하나만으로 본사 계정인지 지점 계정인지 미리 알 수 없어서, <code class="inline">loginAsHq</code>를 먼저 시도하고 실패하면 <code class="inline">loginWithFirebase</code> 또는 <code class="inline">loginWithDb</code>를 이어서 시도한다 — 이때 <strong>같은 <code class="inline">turnstileToken</code> 값을 두 번째 요청에도 그대로 재사용</strong>한다.</p>
+      <p>그런데 Cloudflare Turnstile 토큰은 <code class="inline">siteverify</code>로 한 번 검증되는 순간 폐기되는 값이라, 이메일로 로그인하는 지점 관리자의 경우 1차 시도(<code class="inline">loginAsHq</code> → 실패)에서 토큰이 이미 소모되고, 2차 시도(<code class="inline">loginWithFirebase</code>)의 <code class="inline">TurnstileVerifier.verify()</code>가 같은 토큰을 다시 Cloudflare에 보내면서 "이미 사용된 토큰"으로 거절될 가능성이 있다 — 아이디·비밀번호가 맞아도 로그인이 실패할 수 있는 구조다. 과거 버전(구 <code class="inline">보안 기능 리스트.html</code>)에서는 이 문제를 "검증을 시도 루프 바깥에서 딱 한 번만" 수행하는 방식으로 해결했었는데, 지금 구조로 리팩터링되며 그 안전장치가 사라진 것으로 보인다.</p>
+    </div>
+
+    <h3>백엔드</h3>
+    <div class="file-card">
+      <div class="file-bar"><span class="file-path">backend/.../global/security/TurnstileVerifier.java</span><span class="file-tag">Java</span></div>
+      <pre><code><span class="c">// 프론트에서만 체크하면 /api/*-auth/*를 직접 호출하는 요청은 캡차 없이 통과하므로,
+// 각 로그인 서비스가 실제 인증(비밀번호/Firebase 토큰 검증) 이전에 이걸 먼저 호출해야 의미가 있다</span>
+<span class="k">public void</span> verify(String token) {
+  <span class="k">if</span> (secretKey == null || secretKey.isBlank()) {
+    <span class="k">throw new</span> IllegalStateException(<span class="s">"TURNSTILE_SECRET_KEY가 설정되지 않았습니다."</span>);
+  }
+  <span class="k">if</span> (token == null || token.isBlank()) {
+    <span class="k">throw new</span> IllegalArgumentException(<span class="s">"본인 인증을 먼저 완료해주세요."</span>);
+  }
+  <span class="c">// ... secret + response를 담아 siteverify로 POST ...</span>
+  <span class="k">if</span> (result == null || !result.path(<span class="s">"success"</span>).asBoolean(false)) {
+    <span class="k">throw new</span> IllegalArgumentException(<span class="s">"본인 인증에 실패했습니다. 다시 시도해주세요."</span>);
+  }
+}</code></pre>
+    </div>
+    <p class="dim">별도의 <code class="inline">/api/turnstile/verify</code> 엔드포인트나 전용 컨트롤러 없이, 3개 로그인 서비스가 각자 이 메서드를 직접 호출하는 구조다. 실패하면 <code class="inline">IllegalArgumentException</code>이 던져지고, <code class="inline">GlobalExceptionHandler</code>의 공용 <code class="inline">handleBadRequest</code>가 400으로 바꿔준다.</p>
+
+    <div class="file-card">
+      <div class="file-bar"><span class="file-path">HqAuthService.java · BranchAuthService.java · BranchFallbackLoginService.java</span><span class="file-tag">Java</span></div>
+      <pre><code><span class="c">// HqAuthService.login() — 정상 적용됨</span>
+turnstileVerifier.verify(request.turnstileToken());
+
+<span class="c">// BranchAuthService.firebaseSession() — 정상 적용됨</span>
+turnstileVerifier.verify(request.turnstileToken());
+
+<span class="c">// BranchFallbackLoginService.login() — 호출 자체가 주석 처리되어 있다</span>
+<span class="c">// turnstileVerifier.verify(request.turnstileToken());</span></code></pre>
+    </div>
+    <div class="callout warn">
+      <span class="callout-label">지점 DB 폴백 로그인 경로는 캡차 검증이 꺼져 있음</span>
+      <p><code class="inline">BranchFallbackLoginService.login()</code>(Firebase 장애 시 지점 관리자가 DB 비밀번호로 직접 로그인하는 경로, <code class="inline">/api/branch-auth/db-login</code>)만 <code class="inline">turnstileVerifier.verify()</code> 호출이 주석 처리되어 있다. 이 경로로는 캡차 없이 무제한으로 로그인을 시도할 수 있다는 뜻이다 — <a href="#f1">기능 01의 IP 요청 제한</a>이 유일한 방어선으로 남아 있다. 의도적인 비활성화인지 리팩터링 중 빠뜨린 것인지는 코드만으로는 알 수 없으나, 주석을 풀어 되살리는 편이 안전하다.</p>
+    </div>
+
+    <div class="file-card">
+      <div class="file-bar"><span class="file-path">backend/src/main/resources/application.yml</span><span class="file-tag">YAML</span></div>
+      <pre><code>turnstile:
+  secret-key: <span class="s">${TURNSTILE_SECRET_KEY:}</span></code></pre>
+    </div>
+    <p class="dim">기본값이 빈 문자열이라, 환경변수를 안 채우면 <code class="inline">TurnstileVerifier</code>가 <code class="inline">IllegalStateException</code>으로 즉시 막는다(요청을 그냥 통과시키는 fail-open이 아니라 fail-closed). 실제 값은 백엔드 루트 <code class="inline">.env</code>의 <code class="inline">TURNSTILE_SECRET_KEY</code>, 프론트 <code class="inline">frontend/.env</code>의 <code class="inline">VITE_TURNSTILE_SITE_KEY</code>로 주입한다.</p>
+
+    <h3>로컬에서 체크박스를 강제로 띄우는 법</h3>
+    <p class="dim">Turnstile은 위험도가 낮은 트래픽이면 체크박스 없이 조용히 통과시키는 <strong>적응형(adaptive)</strong> 방식이라, 로컬 개발 환경에서는 거의 항상 자동 통과된다 — 버그가 아니라 사용자 마찰을 줄이기 위한 의도된 동작이다. 체크박스 UI를 눈으로 확인하려면 Cloudflare가 제공하는 더미 테스트 키로 잠깐 바꾸면 된다.</p>
+    <div class="key-table-wrap">
+      <table class="key-table">
+        <thead>
+          <tr><th>키</th><th>구분</th><th>동작</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="key">1x00000000000000000000AA</td>
+            <td>사이트 키</td>
+            <td class="desc">항상 통과 (위젯 보임)</td>
+          </tr>
+          <tr>
+            <td class="key">1x00000000000000000000BB</td>
+            <td>사이트 키</td>
+            <td class="desc">항상 통과 (위젯 안 보임)</td>
+          </tr>
+          <tr class="highlight">
+            <td class="key">3x00000000000000000000FF</td>
+            <td>사이트 키</td>
+            <td class="desc">매번 인터랙티브 챌린지(체크박스) 강제 표시</td>
+          </tr>
+          <tr>
+            <td class="key">2x00000000000000000000AB</td>
+            <td>사이트 키</td>
+            <td class="desc">항상 차단</td>
+          </tr>
+          <tr>
+            <td class="key">1x0000000000000000000000000000000AA</td>
+            <td>시크릿 키</td>
+            <td class="desc">항상 통과 — 위 사이트 키들과 짝을 맞춰 쓴다</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout warn">
+      <span class="callout-label">사이트 키·시크릿 키는 반드시 짝을 맞춰야 함</span>
+      <p>더미 사이트 키가 만든 토큰을 실제 운영 시크릿 키로 검증하면 실패하고, 반대로 실제 사이트 키를 더미 시크릿 키로 검증해도 실패한다. 체크박스 UI 확인이 끝나면 반드시 더미 키를 실제 키로 되돌려야 한다 (자세한 현재 상태는 <a href="#status">운영 전환 전 확인 사항</a> 참고).</p>
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section class="feature" id="f3">
+    <div class="feature-head">
+      <div class="feature-num">03</div>
+      <div class="feature-titles">
+        <h2>비밀번호 자격증명 검증</h2>
+        <div class="feature-where">
+          <span class="loc-tag">HqAuthService.java</span>
+          <span class="loc-tag">BranchFallbackLoginService.java</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel problem">
+      <div class="panel-label"><span class="sw"></span>문제 사항</div>
+      <p>비밀번호를 안전하지 않게 저장·비교하거나, 실패 응답이 계정 존재 여부를 흘릴 수 있다.</p>
+      <p class="analysis"><strong>문제 사항 분석</strong> — 초기 시딩 데이터 중 일부 계정은 <code class="inline">N/A</code>, <code class="inline">FIREBASE$uid</code> 같은 BCrypt 형식이 아닌 값을 <code class="inline">password_hash</code>에 갖고 있어, 그대로 비교하면 예외가 발생한다.</p>
+      <ul>
+        <li>평문 비밀번호 저장은 DB 유출 시 즉시 전체 계정 탈취로 이어짐</li>
+        <li>형식이 안 맞는 해시에서 예외가 그대로 노출되면 "이 아이디는 존재하지만 처리 중 오류"라는 정보가 새어나감</li>
+        <li>"아이디 없음"과 "비밀번호 틀림"을 다른 메시지로 보여주면 계정 존재 여부를 스캔당할 수 있음 (계정 열거, user enumeration)</li>
+      </ul>
+    </div>
+
+    <div class="panel solution">
+      <div class="panel-label"><span class="sw"></span>해결 방안</div>
+      <p>BCrypt 단방향 해시로만 비교하고, 실패 케이스를 전부 같은 결과로 통일했다.</p>
+      <ul>
+        <li>저장은 <code class="inline">PasswordEncoder</code>(BCrypt)로만 수행 — 원문 복구 불가능한 단방향 해시</li>
+        <li><code class="inline">matches()</code> 호출을 try/catch로 감싸, 형식이 안 맞는 해시에서 예외가 나도 "불일치"로 처리</li>
+        <li>아이디 불일치·비밀번호 불일치·계정 상태 문제를 전부 동일한 메시지(<code class="inline">"아이디 또는 비밀번호가 올바르지 않습니다"</code>)로 통일</li>
+      </ul>
+      <div class="file-card">
+        <div class="file-bar"><span class="file-path">HqAuthService.java / BranchFallbackLoginService.java</span><span class="file-tag">Java</span></div>
+        <pre><code><span class="c">// 형식이 안 맞는 해시(예: 시딩 중 남은 "N/A" 같은 값)에 matches()가 예외를 던져도 그냥 "불일치"로 처리한다</span>
+<span class="k">private boolean</span> matches(String rawPassword, String storedHash) {
+  <span class="k">try</span> {
+    <span class="k">return</span> passwordEncoder.matches(rawPassword, storedHash);
+  } <span class="k">catch</span> (Exception e) {
+    <span class="k">return false</span>;
+  }
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section class="feature" id="f4">
+    <div class="feature-head">
+      <div class="feature-num">04</div>
+      <div class="feature-titles">
+        <h2>토큰 서명 · 만료 검증</h2>
+        <div class="feature-where">
+          <span class="loc-tag">AdminTokenService.java</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel problem">
+      <div class="panel-label"><span class="sw"></span>문제 사항</div>
+      <p>세션 저장소 없이도 "이 토큰이 진짜 서버가 발급한 것"인지 신뢰성 있게 확인해야 한다.</p>
+      <p class="analysis"><strong>문제 사항 분석</strong> — <code class="inline">AdminTokenService</code>는 DB나 메모리에 세션을 저장하지 않고, <code class="inline">adminId + 만료시각</code>을 그대로 담은 문자열을 토큰으로 발급한다(stateless). 이 방식의 핵심 위험은 "내용 위조"와 "만료된 토큰 재사용"이다.</p>
+      <ul>
+        <li>토큰에 담긴 <code class="inline">adminId</code>를 그대로 클라이언트가 들고 있는 구조라, 위조 방지 장치가 없으면 다른 계정으로 위장 가능</li>
+        <li>만료 시각을 검증하지 않으면 탈취된 토큰이 영구히 유효해짐</li>
+      </ul>
+    </div>
+
+    <div class="panel solution">
+      <div class="panel-label"><span class="sw"></span>해결 방안</div>
+      <p>HMAC-SHA256 서명과 만료시각 검사를 매 요청마다 수행한다.</p>
+      <ul>
+        <li>토큰 = <code class="inline">payload(adminId:만료시각)</code> + <code class="inline">HMAC-SHA256(payload, 서버만 아는 비밀키)</code> 서명값을 Base64Url로 인코딩</li>
+        <li><code class="inline">verify()</code>에서 서명을 다시 계산해 대조 — 페이로드를 조작하면 서명이 안 맞아 즉시 거부됨</li>
+        <li>만료시각(12시간)을 매 검증마다 확인해 초과 시 <code class="inline">null</code> 반환(=인증 실패로 처리)</li>
+      </ul>
+      <div class="file-card">
+        <div class="file-bar"><span class="file-path">AdminTokenService.java</span><span class="file-tag">Java</span></div>
+        <pre><code><span class="k">public</span> Long verify(String token) {
+  String raw = <span class="k">new</span> String(Base64.getUrlDecoder().decode(token), ...);
+  String[] parts = raw.split(<span class="s">":"</span>);
+  <span class="k">if</span> (!sign(payload).equals(parts[2])) <span class="k">return null</span>; <span class="c">// 서명 불일치 → 위조</span>
+  <span class="k">if</span> (Instant.now().getEpochSecond() &gt; expiresAt) <span class="k">return null</span>; <span class="c">// 만료</span>
+  <span class="k">return</span> Long.parseLong(parts[0]);
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section class="feature" id="f5">
+    <div class="feature-head">
+      <div class="feature-num">05</div>
+      <div class="feature-titles">
+        <h2>Firebase ID 토큰 검증</h2>
+        <div class="feature-where">
+          <span class="loc-tag">BranchAuthService.java</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel problem">
+      <div class="panel-label"><span class="sw"></span>문제 사항</div>
+      <p>비밀번호 검증을 Firebase에 위임한 경로에서, 그 위임 관계 자체를 검증하지 않으면 위조된 토큰으로 로그인될 수 있다.</p>
+      <p class="analysis"><strong>문제 사항 분석</strong> — 지점 로그인(이메일 경로)은 프론트가 Firebase SDK로 로그인 후 발급받은 ID 토큰을 백엔드로 넘기고, 백엔드는 그 토큰을 그대로 신뢰할지 다시 검증할지를 선택해야 한다.</p>
+      <ul>
+        <li>ID 토큰을 서버가 재검증하지 않으면, 클라이언트가 임의로 만든 가짜 토큰이 그대로 통과할 위험</li>
+        <li>검증된 토큰이라도 그 이메일이 실제 승인된 지점 관리자 계정과 연결돼 있는지는 별개로 확인해야 함</li>
+      </ul>
+    </div>
+
+    <div class="panel solution">
+      <div class="panel-label"><span class="sw"></span>해결 방안</div>
+      <p>Firebase Admin SDK로 서명·만료를 서버에서 직접 검증한 뒤, DB의 계정 상태까지 다시 확인한다.</p>
+      <ul>
+        <li><code class="inline">FirebaseAuth.verifyIdToken(idToken, true)</code>로 Firebase 서명과 만료 여부를 직접 검증 (두 번째 인자 <code class="inline">true</code>는 토큰 폐기 여부까지 확인하는 강화 옵션)</li>
+        <li>검증된 토큰의 이메일로 <code class="inline">admin</code> 테이블을 조회해, 실제 존재하는 <code class="inline">BRANCH_MANAGER</code> · <code class="inline">ACTIVE</code> 계정인지 재확인</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section class="feature" id="f6">
+    <div class="feature-head">
+      <div class="feature-num">06</div>
+      <div class="feature-titles">
+        <h2>이미지 업로드 — 경로 탐색(Path Traversal) 방지</h2>
+        <div class="feature-where">
+          <span class="loc-tag">HqUploadController.java</span>
+          <span class="loc-tag">HqUploadService.java</span>
+          <span class="loc-tag">WebMvcConfig.java</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel problem">
+      <div class="panel-label"><span class="sw"></span>문제 사항</div>
+      <p>업로드된 파일을 사용자가 보낸 파일명으로 그대로 저장하거나, 그 파일명으로 다시 서빙하면 서버의 임의 경로를 읽거나 덮어쓸 수 있다.</p>
+      <p class="analysis"><strong>문제 사항 분석</strong> — HQ 관리자가 상품·맛 이미지를 올리는 <code class="inline">POST /api/hq/uploads</code>는 <code class="inline">MultipartFile</code>의 <code class="inline">originalFilename</code>을 받는다. 이 값은 브라우저가 보내주는 그대로라 클라이언트가 임의로 조작할 수 있는 입력이다.</p>
+      <ul>
+        <li>원본 파일명에 <code class="inline">../../../etc/passwd</code> 같은 상대 경로가 섞여 있으면, 그 값을 그대로 저장 경로에 이어 붙였을 때 업로드 디렉터리 밖으로 빠져나가 임의 파일을 덮어쓸 위험(Path Traversal)</li>
+        <li>원본 파일명을 그대로 저장하면 동시에 같은 이름으로 올린 다른 관리자의 파일을 덮어쓸 수 있음(파일 충돌)</li>
+        <li>확장자를 검사하지 않으면 이미지가 아닌 실행 가능한 파일(<code class="inline">.jsp</code>, <code class="inline">.php</code> 등)이 웹이 서빙하는 디렉터리에 올라갈 위험</li>
+      </ul>
+    </div>
+
+    <div class="panel solution">
+      <div class="panel-label"><span class="sw"></span>해결 방안</div>
+      <p>사용자가 보낸 원본 파일명은 확장자를 읽는 데만 쓰고, 실제 저장 파일명은 서버가 <code class="inline">UUID</code>로 새로 만든다 — 그러면 저장 경로에 사용자 입력이 전혀 섞이지 않아 경로 탐색 자체가 성립하지 않는다.</p>
+      <ul>
+        <li>확장자 화이트리스트(<code class="inline">png</code>·<code class="inline">jpg</code>·<code class="inline">jpeg</code>)만 허용, 그 외 확장자는 <code class="inline">IllegalArgumentException</code>으로 거부</li>
+        <li>저장 파일명은 <code class="inline">UUID.randomUUID() + "." + extension</code>으로 서버가 직접 생성 — 원본 파일명 문자열은 저장 경로 조합에 아예 사용되지 않음</li>
+        <li>파일 서빙은 자체 다운로드 API 없이 Spring의 <code class="inline">ResourceHandlerRegistry</code> 정적 리소스 핸들러(<code class="inline">/uploads/**</code>)로만 처리 — 상위 경로 접근을 자체적으로 차단하는 Spring 내장 로직을 그대로 신뢰</li>
+        <li>업로드 엔드포인트는 <code class="inline">HqAccessService.requireAdmin()</code>으로 HQ 관리자만 호출 가능</li>
+      </ul>
+      <div class="file-card">
+        <div class="file-bar"><span class="file-path">HqUploadService.java</span><span class="file-tag">Java</span></div>
+        <pre><code><span class="k">private static final</span> Set&lt;String&gt; ALLOWED_EXTENSIONS = Set.of(<span class="s">"png"</span>, <span class="s">"jpg"</span>, <span class="s">"jpeg"</span>);
+
+<span class="k">public</span> String store(MultipartFile file) {
+  <span class="c">// 원본 파일명은 확장자를 읽는 용도로만 쓴다 - 저장 경로 조합에는 절대 쓰지 않는다</span>
+  String originalName = file.getOriginalFilename() == null ? <span class="s">""</span> : file.getOriginalFilename();
+  String extension = ...; <span class="c">// 마지막 "." 뒤 문자열, 소문자로 정규화</span>
+  <span class="k">if</span> (!ALLOWED_EXTENSIONS.contains(extension)) {
+    <span class="k">throw new</span> IllegalArgumentException(<span class="s">"PNG, JPG, JPEG 파일만 업로드할 수 있습니다."</span>);
+  }
+
+  <span class="c">// 저장 파일명은 UUID로 새로 만든다 - 사용자가 보낸 이름/경로는 여기서 완전히 버려진다</span>
+  String filename = UUID.randomUUID() + <span class="s">"."</span> + extension;
+  Path target = Paths.get(uploadDir).resolve(filename);
+  Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+  <span class="k">return</span> <span class="s">"/uploads/"</span> + filename;
+}</code></pre>
+      </div>
+      <div class="file-card">
+        <div class="file-bar"><span class="file-path">WebMvcConfig.java</span><span class="file-tag">Java</span></div>
+        <pre><code><span class="c">// HqUploadService가 app.upload.dir에 저장한 파일을 /uploads/** 로 그대로 서빙한다</span>
+<span class="k">public void</span> addResourceHandlers(ResourceHandlerRegistry registry) {
+  String location = Paths.get(uploadDir).toAbsolutePath().toUri().toString();
+  registry.addResourceHandler(<span class="s">"/uploads/**"</span>).addResourceLocations(location);
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="callout-label">따로 경로 검증 유틸을 만들 필요가 없었던 이유</span>
+      <p>일반적인 Path Traversal 대응은 "입력 경로를 정규화한 뒤 기준 디렉터리로 시작하는지 검증"하는 방어 코드(<code class="inline">validateAndGetSafePath</code> 같은 유틸)를 따로 둔다. 이 프로젝트는 그 대신 <strong>애초에 사용자 입력이 경로 조합에 들어갈 일을 없앴다</strong> — 저장 시 파일명을 서버가 전부 새로 만들고, 서빙은 Spring 내장 정적 리소스 핸들러에 맡겼다. 공격 표면 자체를 지운 셈이라 더 단순하고 견고하다.</p>
+    </div>
+  </section>
+
+  <!-- 전체 검증 플로우 -->
+  <section class="feature" id="flow">
+    <div class="feature-head">
+      <div class="feature-num">＋</div>
+      <div class="feature-titles">
+        <h2>전체 보안 처리 플로우</h2>
+      </div>
+    </div>
+    <p class="subtitle" style="margin-top: 8px;">위 5개 보안 기능이 로그인 한 번에 실제로 이어지는 순서. 요청 자체를 걸러내는 필터가 가장 먼저 실행되고, 그다음 본사 로그인을 시도하며, 실패하면 아이디 형태(이메일 포함 여부)에 따라 지점 경로로 넘어가는 구조다.</p>
+
+    <div class="flow-list">
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot">1</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <p class="flow-title">IP 요청 빈도 제한</p>
+          <p class="flow-desc"><code class="inline">LoginRateLimitFilter</code>가 컨트롤러에 도달하기도 전에 클라이언트 IP의 5분간 요청 수를 확인한다. 10회를 넘으면 이후 단계는 아예 실행되지 않고 429로 즉시 끝난다.</p>
+          <span class="flow-tag">기능 01</span>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot">2</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <p class="flow-title">Turnstile 검증 — 딱 한 번</p>
+          <p class="flow-desc">로그인 시도를 시작하기 전, <code class="inline">POST /api/turnstile/verify</code>로 사람인지부터 확인한다. 실패하면 이후 단계로 넘어가지 않는다.</p>
+          <span class="flow-tag">기능 02</span>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot">3</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <p class="flow-title">본사 로그인 시도</p>
+          <p class="flow-desc">아이디/이메일로 계정을 조회하면서 <strong>역할 필터(HQ_ADMIN/SUPER_ADMIN)</strong>와 <strong>상태 필터(ACTIVE)</strong>를 동시에 적용한다. 둘 중 하나라도 안 맞으면 "계정 없음"과 동일하게 실패 처리된다.</p>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot">4</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <p class="flow-title">비밀번호 대조</p>
+          <p class="flow-desc">필터를 통과한 계정에 한해 BCrypt로 비밀번호를 대조한다. 형식이 안 맞는 해시라도 예외 대신 "불일치"로 처리된다.</p>
+          <span class="flow-tag">기능 03</span>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot branch">↳</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <p class="flow-title">본사 로그인 실패 시 — 지점 경로로 분기</p>
+          <p class="flow-desc">3~4단계가 실패하면, 입력값에 <code class="inline">@</code>가 있으면 지점 이메일 로그인(Firebase)을, 없으면 지점 DB 폴백 로그인을 시도한다. 어느 경로든 <strong>역할(BRANCH_MANAGER)·상태(ACTIVE) 필터는 동일하게 적용</strong>된다.</p>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot">5</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <p class="flow-title">자격증명 검증 (경로별로 다름)</p>
+          <p class="flow-desc">DB 폴백 경로는 4단계와 동일하게 BCrypt 대조. Firebase 경로는 <code class="inline">FirebaseAuth.verifyIdToken()</code>으로 ID 토큰의 서명·만료를 직접 검증한 뒤 이메일로 계정을 재조회한다.</p>
+          <span class="flow-tag">기능 03 · 05</span>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot">6</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <p class="flow-title">토큰 발급</p>
+          <p class="flow-desc">본사·지점 DB 폴백 경로는 <code class="inline">AdminTokenService</code>가 HMAC 서명이 담긴 stateless 토큰을 발급한다. Firebase 경로는 이미 검증된 Firebase 세션을 그대로 사용한다.</p>
+          <span class="flow-tag">기능 04</span>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-rail"><div class="flow-dot">7</div></div>
+        <div class="flow-content">
+          <p class="flow-title">이후 모든 API 요청에서 재검증</p>
+          <p class="flow-desc">로그인은 여기서 끝나지 않는다. 이후 관리자 화면의 API 호출마다 <code class="inline">HqAccessService</code> / <code class="inline">BranchAccessService</code>가 토큰 서명·역할·계정 상태를 매번 다시 확인한다. 토큰이 탈취돼도 서명이 위조됐거나 계정이 정지됐다면 그 시점부터 접근이 막힌다.</p>
+          <span class="flow-tag">기능 04</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 운영 전환 전 확인 사항 -->
+  <section class="feature" id="status">
+    <div class="feature-head">
+      <div class="feature-num">＋</div>
+      <div class="feature-titles">
+        <h2>운영 전환 전 확인 사항</h2>
+      </div>
+    </div>
+    <p class="subtitle" style="margin-top: 8px;">이미 해결한 것, 배포 전 반드시 되돌려야 할 임시 설정, 그리고 <code class="inline">2차프로젝트 적용 보안사항.txt</code> 체크리스트를 로그인 화면 코드에 대입해보며 새로 찾은 항목들이다.</p>
+
+    <div class="task-list">
+      <div class="task">
+        <div class="task-mark critical">✕</div>
+        <div class="task-body">
+          <span class="task-title">지점 DB 폴백 로그인 — 캡차 검증 비활성화 (최우선)</span>
+          <span class="task-desc"><code class="inline">BranchFallbackLoginService.login()</code>의 <code class="inline">turnstileVerifier.verify()</code> 호출이 주석 처리되어 있다. <code class="inline">/api/branch-auth/db-login</code>은 현재 캡차 없이 시도할 수 있다 — 자세한 내용은 <a href="#f2">기능 02</a> 참고. 주석을 해제해 되살려야 한다.</span>
+        </div>
+      </div>
+      <div class="task">
+        <div class="task-mark">⚠</div>
+        <div class="task-body">
+          <span class="task-title">이메일 로그인 시 Turnstile 토큰 재사용 가능성</span>
+          <span class="task-desc">본사 로그인을 먼저 시도하고 실패하면 지점 Firebase 로그인으로 넘어가는데, 두 요청이 <strong>같은 토큰</strong>을 각각 <code class="inline">TurnstileVerifier.verify()</code>에 넘긴다. Cloudflare는 한 번 검증된 토큰을 재사용하면 거절할 수 있어, 정상적인 지점 관리자가 이메일로 로그인할 때 캡차 단계에서 실패할 위험이 있다 — <a href="#f2">기능 02</a> 참고. 재현 테스트 후 검증을 다시 "시도 루프 바깥에서 한 번만" 수행하는 구조로 되돌리는 것을 권장한다.</span>
+        </div>
+      </div>
+      <div class="task">
+        <div class="task-mark">⚠</div>
+        <div class="task-body">
+          <span class="task-title">로그인 요청 DTO에 입력값 검증(Bean Validation) 없음</span>
+          <span class="task-desc"><code class="inline">HqLoginRequest</code>·<code class="inline">DbLoginRequest</code> record는 <code class="inline">@NotBlank</code> 등 검증 애노테이션이 없고, 컨트롤러도 <code class="inline">@Valid</code> 없이 그대로 받는다. <code class="inline">loginId</code>가 <code class="inline">null</code>로 오면 <code class="inline">HqAuthService.findByIdentifier()</code>의 <code class="inline">identifier.contains("@")</code>에서 <code class="inline">NullPointerException</code>이 나는데, <code class="inline">GlobalExceptionHandler</code>에 이를 받는 핸들러가 없어 "아이디 또는 비밀번호가 올바르지 않습니다" 대신 500 에러가 그대로 노출된다. (「2차프로젝트 적용 보안사항.txt」 9번 항목: 데이터 검증)</span>
+        </div>
+      </div>
+      <div class="task">
+        <div class="task-mark">⚠</div>
+        <div class="task-body">
+          <span class="task-title">HTTPS(SSL) 미적용</span>
+          <span class="task-desc"><code class="inline">application.yml</code>에 <code class="inline">server.ssl</code> 설정이 전혀 없어 지금은 평문 HTTP(:8080)로만 동작한다. 로그인 요청에 비밀번호가 그대로 실려 가는 만큼, 실제 배포 시에는 SSL 인증서 적용이나 리버스 프록시(Nginx 등)의 HTTPS 종단 처리가 필요하다. (「2차프로젝트 적용 보안사항.txt」 6번 항목)</span>
+        </div>
+      </div>
+      <div class="task">
+        <div class="task-mark good">✓</div>
+        <div class="task-body">
+          <span class="task-title">포트 8080 충돌 — 해결됨</span>
+          <span class="task-desc">이 프로젝트와 무관한 Tomcat9 Windows 서비스가 8080을 쓰고 있었다. 서비스를 중지해서 백엔드가 <code class="inline">mvn spring-boot:run</code> 기본 포트(8080)에서 정상적으로 뜨도록 정리했다.</span>
+        </div>
+      </div>
+      <div class="task">
+        <div class="task-mark good">✓</div>
+        <div class="task-body">
+          <span class="task-title">CSRF 403 — 해결됨</span>
+          <span class="task-desc">로그인 API가 캡차와 무관하게 항상 403으로 막혀 있었다. 세션 쿠키가 아니라 Bearer/Firebase 토큰으로 인증하는 stateless API라 CSRF 보호가 애초에 방어할 대상이 없어서, <code class="inline">SecurityConfig.java</code>에서 <code class="inline">/api/**</code>를 CSRF 검사 대상에서 제외했다.</span>
+        </div>
+      </div>
+      <div class="task">
+        <div class="task-mark">⚠</div>
+        <div class="task-body">
+          <span class="task-title">지금은 더미 테스트 키로 실행 중</span>
+          <span class="task-desc">체크박스 UI를 확인하려고 <code class="inline">3x00000000000000000000FF</code> 사이트 키 + 더미 시크릿 키로 바꿔둔 상태다. 확인이 끝나면 <code class="inline">frontend/.env</code>·루트 <code class="inline">.env</code>에 주석 처리해둔 실제 키로 되돌리고 두 서버를 재기동해야 한다 — 더미 키가 운영에 남아있으면 캡차가 실질적으로 무력화된다.</span>
+        </div>
+      </div>
+      <div class="task">
+        <div class="task-mark">⚠</div>
+        <div class="task-body">
+          <span class="task-title">로컬 DB에는 테스트 계정만 있음</span>
+          <span class="task-desc">클라우드 개발 DB에 이 환경에서 접속할 수 없어, 로컬 Docker MySQL에 <code class="inline">01-schema.sql</code>로 스키마만 새로 만들고 로그인 테스트용 계정 2개(<code class="inline">admin</code>/<code class="inline">admin1234</code>, <code class="inline">hadmin</code>/<code class="inline">hadmin1234</code>)만 심어뒀다. 주문·상품 등 나머지 운영 데이터는 옮기지 않았다.</span>
+        </div>
+      </div>
+      <div class="task">
+        <div class="task-mark">⚠</div>
+        <div class="task-body">
+          <span class="task-title">LoginRateLimitFilter 테스트 코드 없음</span>
+          <span class="task-desc"><code class="inline">TurnstileVerifier</code>에는 테스트가 있지만(<code class="inline">TurnstileVerifierTest.java</code>), 5분/10회 임계치와 윈도 리셋 동작을 검증하는 테스트는 아직 없다. 임계치를 바꾸거나 리팩터링할 때 회귀를 잡아줄 안전망이 없는 상태다.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+  <p class="footer-note">kiosk 프로젝트 · 로그인(BranchLoginView.vue)·업로드(HqUploadController.java) 보안 기능 리스트 — 「보안 기능 리스트.html」과 「Turnstile 연동 노트.html」을 통합하고, <code class="inline">feature/LoginLimitFilter</code> 브랜치의 로그인 시도 제한 기능(01번)과 「2차프로젝트 적용 보안사항.txt」 체크리스트 대비 점검 결과(HQ 이미지 업로드 경로 탐색 방지 06번 포함)를 반영해 현재 코드 기준으로 갱신.</p>
+
+</div>
