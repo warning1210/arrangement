@@ -1,0 +1,697 @@
+<title>OWASP Top 10 2025 — 적용 현황</title>
+<style>
+  /*
+    Design system: DESIGN-apple.md (DriveSyncFiles)
+    Single accent (#0066cc) — 적용 완료 표시에만 사용. Zero gradients.
+    Exactly one shadow, reserved for the "product" (여기선 코드 근거 카드).
+    Weight ladder 300/400/600/700, 500 absent. Body 17px. Negative tracking on display.
+    Full-bleed tiles alternate canvas ↔ parchment ↔ near-black; color change is the divider.
+  */
+  :root {
+    --primary: #0066cc; --primary-focus: #0071e3; --primary-on-dark: #2997ff;
+    --ink: #1d1d1f; --on-dark: #ffffff; --body-muted: #cccccc;
+    --ink-muted-80: #333333; --ink-muted-48: #7a7a7a;
+    --divider-soft: #f0f0f0; --hairline: #e0e0e0;
+    --canvas: #ffffff; --parchment: #f5f5f7; --pearl: #fafafc;
+    --tile-1: #272729; --tile-3: #252527;
+    --r-lg: 18px; --r-pill: 9999px; --r-sm: 8px;
+    --sp-sm: 12px; --sp-md: 17px; --sp-lg: 24px; --sp-xl: 32px; --sp-section: 80px;
+    --f-display: "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --f-text: "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Pretendard Variable", sans-serif;
+    --f-mono: ui-monospace, "SF Mono", Consolas, monospace;
+    --shadow-product: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; background: var(--canvas); color: var(--ink); font-family: var(--f-text); }
+  body { scroll-snap-type: y proximity; overflow-y: auto; padding-top: 44px; }
+  @media (prefers-reduced-motion: reduce) { html, body { scroll-behavior: auto; } * { transition-duration: 0.001ms !important; } }
+  h1, h2, h3 { margin: 0; text-wrap: balance; }
+
+  .global-nav {
+    position: fixed; top: 0; left: 0; right: 0; height: 44px; z-index: 20;
+    background: #000; color: var(--on-dark);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 clamp(16px, 4vw, 32px);
+    font-size: 12px; letter-spacing: -0.12px;
+  }
+  .global-nav .gn-count { font-variant-numeric: tabular-nums; opacity: 0.6; }
+
+  .slide {
+    min-height: calc(100vh - 44px);
+    padding: clamp(48px, 7vw, var(--sp-section)) clamp(20px, 6vw, 90px);
+    scroll-snap-align: start;
+    display: flex; flex-direction: column; justify-content: center; gap: var(--sp-lg);
+  }
+  .slide.on-dark { color: var(--on-dark); background: var(--tile-1); }
+  .slide.parchment { background: var(--parchment); }
+  .slide.canvas { background: var(--canvas); }
+
+  .kicker { font-weight: 600; font-size: 14px; letter-spacing: -0.224px; color: var(--ink-muted-48); }
+  .kicker b { color: var(--primary); font-weight: 600; }
+  .on-dark .kicker { color: var(--body-muted); }
+
+  h1.hero-display { font-family: var(--f-display); font-weight: 600; font-size: clamp(32px, 5.6vw, 54px); line-height: 1.07; letter-spacing: -0.28px; max-width: 16ch; }
+  p.lead { font-family: var(--f-display); font-weight: 400; font-size: clamp(17px, 2.2vw, 26px); line-height: 1.32; letter-spacing: 0.1px; max-width: 50ch; color: var(--ink-muted-80); }
+  h2.title { font-family: var(--f-display); font-weight: 600; font-size: clamp(25px, 3.6vw, 38px); line-height: 1.12; letter-spacing: -0.2px; max-width: 22ch; }
+  p.body { font-size: 16px; line-height: 1.47; letter-spacing: -0.374px; color: var(--ink-muted-80); max-width: 74ch; }
+  p.body b { color: var(--ink); font-weight: 600; }
+  .on-dark p.body { color: var(--body-muted); }
+  .on-dark p.body b { color: var(--on-dark); }
+
+  /* 매트릭스 */
+  .matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--sp-sm); }
+  .m-item { display: flex; align-items: flex-start; gap: 12px; background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: 14px 16px; }
+  .m-item.done { border-color: var(--primary); }
+  .m-mark { flex: none; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; margin-top: 1px; }
+  .m-item.done .m-mark { background: var(--primary); color: #fff; }
+  .m-item.partial .m-mark { background: var(--pearl); border: 1px solid var(--hairline); color: var(--ink-muted-48); }
+  .m-body .m-id { font-family: var(--f-mono); font-size: 11px; color: var(--ink-muted-48); }
+  .m-body .m-name { font-weight: 600; font-size: 14.5px; letter-spacing: -0.224px; line-height: 1.3; margin-top: 2px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--ink-muted-48); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .legend i.done { background: var(--primary); }
+  .legend i.partial { background: var(--pearl); border: 1px solid var(--hairline); }
+
+  /* 측정 항목 + 근거 코드 */
+  .split { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(18px, 3vw, 38px); align-items: start; }
+  .measures { display: flex; flex-direction: column; gap: 14px; }
+  .measure { display: flex; gap: 12px; align-items: flex-start; }
+  .measure .dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); margin-top: 8px; }
+  .measure .m-txt { font-size: 15px; line-height: 1.5; color: var(--ink-muted-80); }
+  .measure .m-txt b { color: var(--ink); font-weight: 600; }
+  .measure .m-txt code { font-family: var(--f-mono); font-size: 13px; }
+
+  .evidence { display: flex; flex-direction: column; gap: 14px; }
+  .ev-card { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-product); }
+  .ev-path { font-family: var(--f-mono); font-size: 11.5px; color: var(--ink-muted-48); padding: 10px 16px; border-bottom: 1px solid var(--divider-soft); word-break: break-all; }
+  .ev-card pre { margin: 0; padding: 14px 16px; font-family: var(--f-mono); font-size: 12.5px; line-height: 1.6; color: var(--ink-muted-80); overflow-x: auto; white-space: pre; }
+  .ev-card .c-kw { color: var(--primary); font-weight: 600; }
+  .ev-card .c-str { color: #007a3d; }
+  .ev-card .c-cm { color: var(--ink-muted-48); font-style: italic; }
+
+  /* 표 */
+  .hdr-wrap { overflow-x: auto; border: 1px solid var(--hairline); border-radius: var(--r-lg); background: var(--canvas); box-shadow: var(--shadow-product); }
+  table.hdr { border-collapse: collapse; width: 100%; min-width: 720px; }
+  table.hdr th, table.hdr td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--divider-soft); vertical-align: top; }
+  table.hdr th { font-weight: 600; font-size: 12px; letter-spacing: -0.12px; color: var(--ink-muted-48); }
+  table.hdr tr:last-child td { border-bottom: none; }
+  table.hdr td.h-name { font-family: var(--f-mono); font-size: 12.5px; color: var(--primary); white-space: nowrap; }
+  table.hdr td.h-val { font-family: var(--f-mono); font-size: 11.5px; color: var(--ink-muted-80); }
+  table.hdr td.h-why { font-size: 13.5px; line-height: 1.45; color: var(--ink-muted-80); }
+  table.hdr td.h-why b { color: var(--ink); font-weight: 600; }
+  table.hdr td.st { white-space: nowrap; font-size: 12px; font-weight: 600; }
+  table.hdr td.st.yes { color: var(--primary); }
+  table.hdr td.st.no { color: var(--ink-muted-48); }
+
+  /* A06 대비 박스 */
+  .a06-lead { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 2.4vw, 26px); }
+  .a06-box { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: 18px 20px; }
+  .a06-box.design { border-color: var(--primary); }
+  .a06-box h3 { font-family: var(--f-display); font-weight: 600; font-size: 15px; letter-spacing: -0.2px; margin-bottom: 8px; }
+  .a06-box.design h3 { color: var(--primary); }
+  .a06-box p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-muted-80); }
+  .a06-box p + p { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--divider-soft); }
+  .a06-box b { color: var(--ink); font-weight: 600; }
+
+  .todo-list { display: flex; flex-direction: column; gap: 14px; }
+  .todo { display: flex; gap: 16px; align-items: flex-start; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.16); }
+  .todo .t-id { font-family: var(--f-mono); font-size: 12px; color: var(--body-muted); flex: none; width: 58px; padding-top: 3px; }
+  .todo .t-body h3 { font-weight: 600; font-size: 15.5px; letter-spacing: -0.224px; margin-bottom: 4px; }
+  .todo .t-body p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--body-muted); }
+
+
+  /* 수정 전 / 수정 후 */
+  .diff { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 2.2vw, 26px); align-items: start; }
+  .d-card { border-radius: var(--r-lg); overflow: hidden; }
+  .d-card.before { border: 1px solid var(--hairline); background: var(--pearl); }
+  .d-card.after { border: 1px solid var(--primary); background: var(--canvas); box-shadow: var(--shadow-product); }
+  .d-head { padding: 11px 16px; border-bottom: 1px solid var(--divider-soft); display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .d-head .d-tag { font-size: 12px; font-weight: 600; letter-spacing: -0.12px; white-space: nowrap; }
+  .d-card.before .d-tag { color: var(--ink-muted-48); }
+  .d-card.after .d-tag { color: var(--primary); }
+  .d-head .d-path { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-muted-48); text-align: right; word-break: break-all; }
+  .d-card pre { margin: 0; padding: 14px 16px; font-family: var(--f-mono); font-size: 12px; line-height: 1.6; color: var(--ink-muted-80); overflow-x: auto; white-space: pre; }
+  .d-card .c-kw { color: var(--primary); font-weight: 600; }
+  .d-card.before .c-kw { color: var(--ink-muted-80); }
+  .d-card .c-str { color: #007a3d; }
+  .d-card .c-cm { color: var(--ink-muted-48); font-style: italic; }
+  .d-card .c-bad { color: #c0392b; font-weight: 600; }
+  .d-note { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 2.2vw, 26px); }
+  .d-note div { font-size: 13.5px; line-height: 1.5; color: var(--ink-muted-80); }
+  .d-note div b { color: var(--ink); font-weight: 600; }
+  .d-note div.ok b { color: var(--primary); }
+
+  .nav-dots { position: fixed; right: clamp(10px, 2vw, 22px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 9px; z-index: 15; }
+  .nav-dots button { width: 6px; height: 6px; border-radius: 50%; border: none; background: var(--ink-muted-48); opacity: 0.4; padding: 0; cursor: pointer; position: relative; transition: transform 0.15s ease; }
+  .nav-dots button.active { background: var(--primary); opacity: 1; transform: scale(1.4); }
+  .nav-dots button:active { transform: scale(0.95); }
+  .nav-dots button:focus-visible { outline: 2px solid var(--primary-focus); outline-offset: 4px; }
+  .nav-dots .dot-label { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--ink); white-space: nowrap; background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-sm); padding: 5px 10px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease; }
+  .nav-dots button:hover .dot-label, .nav-dots button:focus-visible .dot-label { opacity: 1; }
+
+  @media (max-width: 860px) {
+    .split, .a06-lead, .diff, .d-note { grid-template-columns: 1fr; }
+    .nav-dots { display: none; }
+  }
+</style>
+
+<div class="global-nav">
+  <span>OWASP Top 10 2025 — 아이스크림 키오스크 적용 현황</span>
+  <span class="gn-count" id="gnCount">01 / 14</span>
+</div>
+<div class="nav-dots" id="navDots"></div>
+
+<!-- 01 title -->
+<section class="slide canvas">
+  <div class="kicker">발표 자료</div>
+  <h1 class="hero-display">OWASP Top 10 2025<br>적용 현황</h1>
+  <p class="lead">아이스크림 프랜차이즈 키오스크 시스템에 실제로 적용한 보안 조치를, 근거 코드와 함께 항목별로 정리했다.</p>
+</section>
+
+<!-- 02 matrix -->
+<section class="slide parchment">
+  <div class="kicker">한눈에 보기</div>
+  <h2 class="title">10개 항목 전부 적용</h2>
+
+  <div class="matrix">
+    <div class="m-item done"><span class="m-mark">✓</span><div class="m-body"><div class="m-id">A01</div><div class="m-name">Broken Access Control</div></div></div>
+    <div class="m-item done"><span class="m-mark">✓</span><div class="m-body"><div class="m-id">A02</div><div class="m-name">Security Misconfiguration</div></div></div>
+    <div class="m-item done"><span class="m-mark">✓</span><div class="m-body"><div class="m-id">A03</div><div class="m-name">Software Supply Chain Failures</div></div></div>
+    <div class="m-item done"><span class="m-mark">✓</span><div class="m-body"><div class="m-id">A04</div><div class="m-name">Cryptographic Failures</div></div></div>
+    <div class="m-item done"><span class="m-mark">✓</span><div class="m-body"><div class="m-id">A05</div><div class="m-name">Injection</div></div></div>
+    <div class="m-item done"><span class="m-mark">✓</span><div class="m-body"><div class="m-id">A06</div><div class="m-name">Insecure Design</div></div></div>
+    <div class="m-item done"><span class="m-mark">✓</span><div class="m-body"><div class="m-id">A07</div><div class="m-name">Authentication Failures</div></div></div>
+    <div class="m-item done"><span class="m-mark">✓</span><div class="m-body"><div class="m-id">A08</div><div class="m-name">Data Integrity Failures</div></div></div>
+    <div class="m-item done"><span class="m-mark">✓</span><div class="m-body"><div class="m-id">A09</div><div class="m-name">Logging and Alerting Failures</div></div></div>
+    <div class="m-item done"><span class="m-mark">✓</span><div class="m-body"><div class="m-id">A10</div><div class="m-name">Mishandling of Exceptional Conditions</div></div></div>
+  </div>
+
+  <div class="legend">
+    <span><i class="done"></i>적용 완료 (10)</span>
+    <span><i class="partial"></i>추가 개선 여지 — 위협 모델링 문서화</span>
+  </div>
+</section>
+
+<!-- 03 A01 -->
+<section class="slide canvas">
+  <div class="kicker"><b>A01:2025</b> &nbsp;Broken Access Control</div>
+  <h2 class="title">권한은 URL이 아니라<br>토큰에서 결정한다</h2>
+
+  <div class="diff">
+    <div class="d-card before">
+      <div class="d-head"><span class="d-tag">수정 전</span><span class="d-path">branch/order/controller/BranchOrderController.java</span></div>
+<pre>@RequestMapping(<span class="c-str">"/api/branch/{branchId}/orders"</span>)
+<span class="c-kw">public class</span> BranchOrderController {
+
+  @GetMapping
+  <span class="c-kw">public</span> ResponseEntity&lt;List&lt;...&gt;&gt; getBranchOrders(
+          <span class="c-bad">@PathVariable Long branchId</span>) {
+    <span class="c-cm">// URL에 담긴 값을 그대로 사용</span>
+    <span class="c-kw">return</span> ok(service.getBranchOrders(branchId));
+  }</pre>
+    </div>
+    <div class="d-card after">
+      <div class="d-head"><span class="d-tag">수정 후</span><span class="d-path">같은 파일 + global/security/BranchAccessService.java</span></div>
+<pre>@RequestMapping(<span class="c-str">"/api/branch/orders"</span>)
+<span class="c-kw">public class</span> BranchOrderController {
+
+  @GetMapping
+  <span class="c-kw">public</span> List&lt;...&gt; getBranchOrders(
+          @RequestHeader(<span class="c-str">"Authorization"</span>) String auth) {
+    <span class="c-cm">// 토큰 주인이 담당하는 지점을 서버가 조회</span>
+    Long branchId = branchAccessService.requireBranchId(auth);
+    <span class="c-kw">return</span> service.getBranchOrders(branchId);
+  }</pre>
+    </div>
+  </div>
+  <div class="d-note">
+    <div><b>문제</b> — 1번 지점 관리자가 URL만 <b>/api/branch/3/orders</b>로 바꾸면 남의 지점 주문을 그대로 조회할 수 있었다.</div>
+    <div class="ok"><b>해결</b> — URL에서 지점 번호를 아예 없앴다. 토큰을 검증해 담당 지점을 서버가 정하므로 조작할 값 자체가 없다.</div>
+  </div>
+
+</section>
+
+<!-- 04 A02 -->
+<section class="slide parchment">
+  <div class="kicker"><b>A02:2025</b> &nbsp;Security Misconfiguration</div>
+  <h2 class="title">보안 헤더 6종 +<br>기본값 없는 시크릿</h2>
+
+  <div class="diff">
+    <div class="d-card before">
+      <div class="d-head"><span class="d-tag">수정 전</span><span class="d-path">frontend/nginx.conf · application.yml</span></div>
+<pre>server {
+    listen 80;
+    root /usr/share/nginx/html;
+    <span class="c-cm"># 보안 헤더 없음</span>
+
+    location /api/ { ... }
+}
+
+<span class="c-cm"># application.yml</span>
+password: ${DB_PASSWORD<span class="c-bad">:kiosk6578</span>}  <span class="c-cm"># 실제 비밀번호가 기본값</span></pre>
+    </div>
+    <div class="d-card after">
+      <div class="d-head"><span class="d-tag">수정 후</span><span class="d-path">frontend/nginx.conf · application.yml</span></div>
+<pre>server {
+    listen 80;
+    add_header Strict-Transport-Security <span class="c-str">"max-age=31536000..."</span> always;
+    add_header Content-Security-Policy <span class="c-str">"default-src 'self'; ..."</span> always;
+    add_header X-Frame-Options <span class="c-str">"SAMEORIGIN"</span> always;
+    add_header X-Content-Type-Options <span class="c-str">"nosniff"</span> always;
+    add_header Referrer-Policy <span class="c-str">"strict-origin-when-cross-origin"</span> always;
+    add_header Permissions-Policy <span class="c-str">"camera=(), ..."</span> always;
+}
+
+password: ${DB_PASSWORD}   <span class="c-cm"># 기본값 제거 — 누락 시 기동 중단</span></pre>
+    </div>
+  </div>
+  <div class="d-note">
+    <div><b>문제</b> — 외부 보안 스캐너가 헤더 6종 누락을 지적했고, 저장소에 실제 DB 비밀번호가 기본값으로 남아 있었다.</div>
+    <div class="ok"><b>해결</b> — 헤더 6종을 server 블록에 추가해 모든 응답에 적용. 시크릿은 기본값을 없애 누락되면 서버가 아예 뜨지 않게 했다.</div>
+  </div>
+
+</section>
+
+<!-- 05 보안 헤더 상세 -->
+<section class="slide canvas">
+  <div class="kicker">A02 상세 &nbsp;·&nbsp; frontend/nginx.conf</div>
+  <h2 class="title">보안 헤더 6종,<br>각각 무엇을 막나</h2>
+
+  <div class="hdr-wrap">
+    <table class="hdr">
+      <thead><tr><th>헤더</th><th>적용한 값</th><th>막는 것</th></tr></thead>
+      <tbody>
+        <tr><td class="h-name">Strict-Transport-Security</td><td class="h-val">max-age=31536000;<br>includeSubDomains</td><td class="h-why"><b>SSL-strip</b> — 중간에서 HTTPS를 HTTP로 강등시켜 통신을 엿보는 공격. 브라우저가 1년간 이 도메인을 HTTPS로만 접속한다. <b>단, 현재 80 포트만 열려 있어 HTTPS 적용 후에 효력이 생긴다.</b></td></tr>
+        <tr><td class="h-name">Content-Security-Policy</td><td class="h-val">default-src 'self'<br>+ 실제 사용 도메인만 허용</td><td class="h-why"><b>XSS</b> — 악성 스크립트가 삽입돼도 허용되지 않은 출처면 브라우저가 실행을 차단한다. 6종 중 가장 강력하고, 유일하게 우리 프로젝트를 조사해야 값이 나오는 헤더.</td></tr>
+        <tr><td class="h-name">X-Frame-Options</td><td class="h-val">SAMEORIGIN</td><td class="h-why"><b>클릭재킹</b> — 우리 로그인 페이지를 투명 iframe으로 감싸 사용자가 모르고 클릭하게 만드는 공격. CSP의 frame-ancestors와 함께 구형 브라우저까지 대응.</td></tr>
+        <tr><td class="h-name">X-Content-Type-Options</td><td class="h-val">nosniff</td><td class="h-why"><b>MIME 스니핑</b> — 업로드된 이미지 안에 숨겨진 스크립트를 브라우저가 오인해 실행하는 것. 이미지 업로드 기능이 있어 실질적 의미가 있다.</td></tr>
+        <tr><td class="h-name">Referrer-Policy</td><td class="h-val">strict-origin-<br>when-cross-origin</td><td class="h-why"><b>URL 정보 유출</b> — 외부 사이트로 이동할 때 주문번호·관리자 경로가 담긴 전체 URL이 상대 서버 로그에 남는 것. 외부로는 도메인만 보낸다.</td></tr>
+        <tr><td class="h-name">Permissions-Policy</td><td class="h-val">camera=(), microphone=(),<br>geolocation=(), usb=(), payment=()</td><td class="h-why"><b>불필요한 기능 악용</b> — 안 쓰는 브라우저 기능을 아예 꺼둬, XSS가 성공해도 카메라·마이크 접근 시도 자체가 차단된다.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="body">값이 정해져 있어 넣기만 하면 되는 5개와 달리, <b>CSP는 프로젝트가 실제로 붙는 외부 도메인을 전부 찾아내야</b> 값을 쓸 수 있었다 — Turnstile · Toss Payments · Firebase Auth · 카카오 우편번호 4곳. 하나라도 빠뜨리면 해당 기능이 조용히 동작을 멈춘다.</p>
+</section>
+
+<!-- 06 A03 -->
+<section class="slide parchment">
+  <div class="kicker"><b>A03:2025</b> &nbsp;Software Supply Chain Failures</div>
+  <h2 class="title">의존성 취약점을<br>사람이 아니라 봇이 감시한다</h2>
+
+  <div class="diff">
+    <div class="d-card before">
+      <div class="d-head"><span class="d-tag">수정 전</span><span class="d-path">(파일 없음)</span></div>
+<pre><span class="c-cm">// 의존성 스캔 설정 없음</span>
+
+<span class="c-cm">// Maven·npm 라이브러리 버전을
+// 사람이 수동으로만 관리
+// → 취약점이 공개돼도 알 방법이 없음</span></pre>
+    </div>
+    <div class="d-card after">
+      <div class="d-head"><span class="d-tag">수정 후</span><span class="d-path">.github/dependabot.yml</span></div>
+<pre>version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /backend
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule: { interval: weekly }
+
+  - package-ecosystem: github-actions
+    schedule: { interval: monthly }</pre>
+    </div>
+  </div>
+  <div class="d-note">
+    <div><b>문제</b> — 쓰고 있는 라이브러리에 취약점이 공개돼도 아무도 모른 채 계속 쓰게 된다.</div>
+    <div class="ok"><b>해결</b> — GitHub가 매주 의존성을 검사해 취약·구버전이 있으면 업데이트 PR을 자동으로 연다. 머지 여부는 사람이 판단한다.</div>
+  </div>
+
+</section>
+
+<!-- 07 A04 -->
+<section class="slide canvas">
+  <div class="kicker"><b>A04:2025</b> &nbsp;Cryptographic Failures</div>
+  <h2 class="title">민감정보는<br>평문으로 저장하지 않는다</h2>
+
+  <div class="diff">
+    <div class="d-card before">
+      <div class="d-head"><span class="d-tag">수정 전</span><span class="d-path">kiosk/order/service/OrderService.java</span></div>
+<pre><span class="c-cm">// 입력받은 번호를 변환 없이 그대로 조회·저장</span>
+customer = customerRepository
+    .<span class="c-bad">findByMobileNumber</span>(request.customerMobileNumber())
+    .orElseGet(() -&gt; customerRepository.save(
+        Customer.builder()
+            .<span class="c-bad">mobileNumber</span>(request.customerMobileNumber())
+            .build()));</pre>
+    </div>
+    <div class="d-card after">
+      <div class="d-head"><span class="d-tag">수정 후</span><span class="d-path">OrderService.java · MobileNumberCrypto.java</span></div>
+<pre><span class="c-cm">// 저장 전에 두 가지로 변환 — 평문은 이 메서드를 벗어나지 않는다</span>
+String hash = <span class="c-kw">MobileNumberCrypto.hash</span>(rawMobileNumber);
+customer = customerRepository.findByMobileNumberHash(hash)
+    .orElseGet(() -&gt; customerRepository.save(
+        Customer.builder()
+            .mobileNumberHash(hash)                            <span class="c-cm">// 조회용</span>
+            .mobileNumberMasked(<span class="c-kw">MobileNumberCrypto.mask</span>(rawMobileNumber))
+            .build()));                                        <span class="c-cm">// 010****5678</span>
+
+<span class="c-cm">// MobileNumberCrypto</span>
+<span class="c-kw">public static</span> String hash(String plain) {   <span class="c-cm">// SHA-256 → 64자 hex</span>
+    <span class="c-kw">return</span> HexFormat.of().formatHex(
+        MessageDigest.getInstance(<span class="c-str">"SHA-256"</span>)
+            .digest(plain.getBytes(UTF_8)));
+}
+<span class="c-kw">public static</span> String mask(String plain) {   <span class="c-cm">// 앞3 + **** + 뒤4</span>
+    <span class="c-kw">return</span> plain.substring(0,3) + <span class="c-str">"****"</span> + plain.substring(7);
+}</pre>
+    </div>
+  </div>
+  <div class="d-note">
+    <div><b>문제</b> — 입력받은 번호를 변환 없이 그대로 넘겨 DB에 평문으로 쌓였다. DB가 유출되면 전화번호가 그대로 노출되고, 백업 파일·관리 도구 화면에서도 평문이 보인다.</div>
+    <div class="ok"><b>해결</b> — 저장 직전에 <b>조회용 해시</b>와 <b>표시용 마스킹</b> 두 값으로 변환한다. 해시는 같은 번호면 항상 같은 값이라 <code>WHERE</code> 조회가 되고, 평문은 이 메서드를 벗어나면 어디에도 남지 않는다.</div>
+  </div>
+
+</section>
+
+<!-- 08 A05 -->
+<section class="slide parchment">
+  <div class="kicker"><b>A05:2025</b> &nbsp;Injection</div>
+  <h2 class="title">SQL · 로그 · 파일<br>세 경로를 모두 차단</h2>
+
+  <div class="diff">
+    <div class="d-card before">
+      <div class="d-head"><span class="d-tag">수정 전</span><span class="d-path">global/exception/GlobalExceptionHandler.java</span></div>
+<pre>log.error(<span class="c-str">"토스 결제 처리 중 예외. code={}"</span>,
+          <span class="c-bad">e.getTossErrorCode()</span>, e);
+<span class="c-cm">// 외부 응답값을 그대로 로그에 기록</span>
+
+<span class="c-cm">// logback-spring.xml 없음 → 콘솔 기본 출력만</span></pre>
+    </div>
+    <div class="d-card after">
+      <div class="d-head"><span class="d-tag">수정 후</span><span class="d-path">GlobalExceptionHandler.java · logback-spring.xml · CrlfUtils.java</span></div>
+<pre>log.error(<span class="c-str">"Toss payment failed. code={}"</span>,
+          <span class="c-kw">sanitizeForLog</span>(e.getTossErrorCode()), e);
+
+<span class="c-cm">&lt;!-- logback-spring.xml: 프레임워크 로그까지 전역 차단 --&gt;</span>
+&lt;pattern&gt;... %replace(%m){<span class="c-str">'[CR/LF]+'</span>, <span class="c-str">' '</span>}%n&lt;/pattern&gt;</pre>
+    </div>
+  </div>
+  <div class="d-note">
+    <div><b>문제</b> — 외부 응답에 개행 문자가 섞이면 <b>가짜 로그 줄</b>을 끼워 넣을 수 있다(CWE-117). 로그를 근거로 한 사후 추적이 무력화된다.</div>
+    <div class="ok"><b>해결</b> — 호출 지점에서 개행을 제거하고, logback 설정으로 프레임워크 로그까지 전역 차단해 <b>두 겹</b>으로 막았다.</div>
+  </div>
+
+</section>
+
+<!-- 09 A06 -->
+<section class="slide canvas">
+  <div class="kicker"><b>A06:2025</b> &nbsp;Insecure Design</div>
+  <h2 class="title">코드가 아니라<br>설계가 잘못된 경우</h2>
+
+  <div class="a06-lead">
+    <div class="a06-box">
+      <h3>구현 결함 (나머지 9개 항목)</h3>
+      <p>설계는 맞는데 <b>코드를 잘못 짠 것</b>. 파라미터 바인딩을 쓰기로 해놓고 한 곳에서 문자열을 이어붙인 경우 등.</p>
+      <p>→ 그 코드를 고치면 해결된다.</p>
+    </div>
+    <div class="a06-box design">
+      <h3>설계 결함 (A06)</h3>
+      <p><b>코드를 완벽하게 구현해도 안전하지 않은 것</b>. 필요한 방어가 애초에 설계에 없었던 경우.</p>
+      <p>→ 설계를 바꿔야 해결된다.</p>
+    </div>
+  </div>
+
+  <p class="body">판별 기준은 하나다 — <b>"이 코드를 버그 없이 완벽하게 구현하면 안전해지나?"</b> 아니라면 설계 결함이다. 이번에 추가한 주문 수량 제한이 정확히 그 사례로, 상한이 없던 것은 코드 버그가 아니라 <b>제한을 둔다는 발상이 설계에 없었던 것</b>이다.</p>
+
+  <div class="diff">
+    <div class="d-card before">
+      <div class="d-head"><span class="d-tag">수정 전</span><span class="d-path">kiosk/order/service/OrderService.java</span></div>
+<pre><span class="c-kw">public</span> OrderCheckoutResponse checkout(OrderCheckoutRequest request) {
+    <span class="c-kw">if</span> (request.items() == <span class="c-kw">null</span> || request.items().isEmpty()) {
+        <span class="c-kw">throw new</span> ResponseStatusException(BAD_REQUEST,
+                <span class="c-str">"장바구니가 비어있습니다."</span>);
+    }
+    <span class="c-bad">// 상한 없음 — 10,000개도 그대로 처리</span>
+    ...</pre>
+    </div>
+    <div class="d-card after">
+      <div class="d-head"><span class="d-tag">수정 후</span><span class="d-path">같은 파일</span></div>
+<pre><span class="c-kw">private static final int</span> MAX_ITEMS_PER_ORDER = 50;
+
+<span class="c-kw">public</span> OrderCheckoutResponse checkout(OrderCheckoutRequest request) {
+    <span class="c-kw">if</span> (request.items() == <span class="c-kw">null</span> || request.items().isEmpty()) { ... }
+
+    <span class="c-kw">if</span> (request.items().size() &gt; MAX_ITEMS_PER_ORDER) {
+        <span class="c-kw">throw new</span> ResponseStatusException(BAD_REQUEST,
+                <span class="c-str">"한 번에 주문할 수 있는 상품은 50개까지입니다."</span>);
+    }</pre>
+    </div>
+  </div>
+  <div class="d-note">
+    <div><b>문제</b> — 코드는 시키는 대로 정상 동작했다. <b>제한을 둔다는 발상 자체가 설계에 없었던 것</b>이라, API를 직접 호출해 수천 건을 담으면 요청 하나로 DB를 오래 점유할 수 있었다.</div>
+    <div class="ok"><b>해결</b> — 상한을 설계에 추가했다. 함께 관리자 토큰의 <b>5가지 공격 시나리오를 테스트로 재현</b>해 전부 거부되는지 검증했다.</div>
+  </div>
+
+  <div class="hdr-wrap">
+    <table class="hdr">
+      <thead><tr><th>OWASP 권고 대응책</th><th>우리 프로젝트</th><th>상태</th></tr></thead>
+      <tbody>
+        <tr><td class="h-name">사용자별 리소스 소비 제한</td><td class="h-why">주문 항목 50개 상한 · 로그인 5분 10회 · 업로드 5MB</td><td class="st yes">적용</td></tr>
+        <tr><td class="h-name">위협 모델 기반 테스트</td><td class="h-why">관리자 토큰 위조·만료연장·서명변조·타키생성·형식파괴 5종 공격 시나리오 테스트</td><td class="st yes">적용</td></tr>
+        <tr><td class="h-name">테넌트(지점) 격리</td><td class="h-why">접근 통제·실시간 알림 모두 branchId 기준 분리</td><td class="st yes">적용</td></tr>
+        <tr><td class="h-name">클라이언트 입력 불신</td><td class="h-why">결제 금액·주문 ID 서버 재검증, URL의 지점 번호 미사용</td><td class="st yes">적용</td></tr>
+        <tr><td class="h-name">계층 방어</td><td class="h-why">로그 위조를 호출 지점과 로깅 설정 두 겹으로 차단</td><td class="st yes">적용</td></tr>
+        <tr><td class="h-name">위협 모델링 문서</td><td class="h-why">각 항목별 대응책은 이 자료로 정리했으나, 자산·공격자·공격 경로를 한 장으로 묶은 문서는 아직 없음</td><td class="st no">개선 여지</td></tr>
+        <tr><td class="h-name">설계 단계 보안 요구사항</td><td class="h-why">요구사항 정의서에 공통 보안 요구사항 6건 명시 — S-087 비밀번호 암호화 · S-089 역할 기반 접근제어 · S-090 SQL Injection 방지 · S-093 결제 위변조 방지(P0) · S-094 감사 로그 · S-095 예외 응답 표준화(P1)</td><td class="st yes">적용</td></tr>
+        <tr><td class="h-name">보안 설계 리뷰</td><td class="h-why">OWASP Top 10 전 항목을 코드 기준으로 전수 점검하고 미충족분을 그 자리에서 구현 — 이 자료가 그 기록</td><td class="st yes">적용</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="body">보안 요구사항은 기능 요구사항과 함께 <b>요구사항 정의서에 P0/P1로 명시</b>돼 있었고, 이번 점검에서 그 각각이 실제로 구현됐는지 코드로 확인했다. 점검 중 비어 있던 <b>리소스 소비 제한</b>은 요구사항의 목적대로 그 자리에서 구현했다. 남은 것은 자산·공격 경로를 한 장으로 묶은 위협 모델 문서뿐이다.</p>
+</section>
+
+<!-- 10 A07 -->
+<section class="slide parchment">
+  <div class="kicker"><b>A07:2025</b> &nbsp;Authentication Failures</div>
+  <h2 class="title">캡차 · 레이트 리밋 ·<br>토큰 만료</h2>
+
+  <div class="diff">
+    <div class="d-card before">
+      <div class="d-head"><span class="d-tag">수정 전</span><span class="d-path">branch/auth/service/BranchFallbackLoginService.java</span></div>
+<pre><span class="c-kw">public</span> DbLoginResponse login(DbLoginRequest request) {
+   <span class="c-bad">// turnstileVerifier.verify(request.turnstileToken());</span>
+
+    Admin admin = adminRepository.findByLoginId(...)
+        ...
+}
+
+<span class="c-cm">// TurnstileVerifier: 재사용 캐시 없음 → 토큰 1회용</span></pre>
+    </div>
+    <div class="d-card after">
+      <div class="d-head"><span class="d-tag">수정 후</span><span class="d-path">같은 파일 · global/security/TurnstileVerifier.java</span></div>
+<pre><span class="c-kw">public</span> DbLoginResponse login(DbLoginRequest request) {
+    turnstileVerifier.verify(request.turnstileToken());   <span class="c-cm">// 복구</span>
+    ...
+}
+
+<span class="c-cm">// TurnstileVerifier: 검증 성공한 토큰을 60초간 통과</span>
+<span class="c-kw">if</span> (verifiedUntil.containsKey(token)) <span class="c-kw">return</span>;
+...
+verifiedUntil.put(token, now.plus(REUSE_WINDOW));</pre>
+    </div>
+  </div>
+  <div class="d-note">
+    <div><b>문제</b> — 로그인 화면이 본사 → 지점 순으로 시도하는데 토큰은 1회용이라 첫 경로가 소모하면 지점 경로에서 항상 실패했다. 그래서 <b>검증이 주석 처리된 채 방치</b>돼 있었다.</div>
+    <div class="ok"><b>해결</b> — 성공한 토큰만 60초간 통과시켜 순차 시도를 가능하게 하고 검증을 복구했다. 이제 <b>로그인 경로 3곳 전부</b> 캡차가 걸린다.</div>
+  </div>
+
+</section>
+
+<!-- 11 A08 -->
+<section class="slide canvas">
+  <div class="kicker"><b>A08:2025</b> &nbsp;Software or Data Integrity Failures</div>
+  <h2 class="title">결제 금액은<br>클라이언트를 믿지 않는다</h2>
+
+  <div class="diff">
+    <div class="d-card before">
+      <div class="d-head"><span class="d-tag">취약한 구현 예시 (안티패턴)</span><span class="d-path">우리 코드가 아님 — 일반적인 실수 사례</span></div>
+<pre><span class="c-cm">// 클라이언트가 보낸 금액을 그대로 신뢰하는 경우</span>
+<span class="c-kw">public</span> void confirm(TossConfirmRequest request) {
+    tossGateway.confirm(request.paymentKey(),
+                        request.orderId(),
+                        <span class="c-bad">request.amount()</span>);
+    <span class="c-cm">// 서버가 보관 중인 실제 금액과 대조하지 않음
+    // → 결제창에서 금액을 1원으로 바꿔 보내면 그대로 승인</span>
+}</pre>
+    </div>
+    <div class="d-card after">
+      <div class="d-head"><span class="d-tag">수정 후</span><span class="d-path">kiosk/payment/service/PaymentService.java (실제 코드)</span></div>
+<pre><span class="c-cm">// 주문 식별자 일치 검증 (위변조 방지)</span>
+<span class="c-kw">if</span> (!request.qrToken().equals(request.orderId())) {
+    <span class="c-kw">throw new</span> ResponseStatusException(BAD_REQUEST,
+        <span class="c-str">"결제 요청 정보가 일치하지 않습니다."</span>);
+}
+<span class="c-cm">// 서버가 들고 있던 실제 금액과 대조 (조작 방지)</span>
+<span class="c-kw">if</span> (!payment.getRequestedAmount().equals(request.amount())) {
+    <span class="c-kw">throw new</span> ResponseStatusException(BAD_REQUEST,
+        <span class="c-str">"결제 금액이 일치하지 않습니다."</span>);
+}</pre>
+    </div>
+  </div>
+  <div class="d-note">
+    <div><b>문제</b> — 이 항목은 <b>초기 결제 기능 구현 시점부터 검증이 들어가 있어 수정 전 코드가 없다.</b> 왼쪽은 흔히 발생하는 안티패턴을 예시로 든 것이다.</div>
+    <div class="ok"><b>해결</b> — 금액과 주문 식별자를 서버가 재검증하고, 포인트도 차감 직전에 잔액을 다시 확인한다.</div>
+  </div>
+
+</section>
+
+<!-- 12 A09 -->
+<section class="slide parchment">
+  <div class="kicker"><b>A09:2025</b> &nbsp;Security Logging and Alerting Failures</div>
+  <h2 class="title">로그를 남기되<br>위조되지 않게</h2>
+
+  <div class="diff">
+    <div class="d-card before">
+      <div class="d-head"><span class="d-tag">수정 전</span><span class="d-path">(logback 설정 파일 없음)</span></div>
+<pre><span class="c-cm">// 로깅 설정 파일이 없어 스프링 기본값 사용
+// → 콘솔 출력만, 파일 저장 없음
+// → 서버를 재시작하면 이전 로그가 사라짐
+// → 사후 추적이 불가능</span></pre>
+    </div>
+    <div class="d-card after">
+      <div class="d-head"><span class="d-tag">수정 후</span><span class="d-path">backend/src/main/resources/logback-spring.xml</span></div>
+<pre>&lt;appender name=<span class="c-str">"FILE"</span> class=<span class="c-str">"...RollingFileAppender"</span>&gt;
+  &lt;file&gt;${LOG_PATH}/application.log&lt;/file&gt;
+  &lt;rollingPolicy class=<span class="c-str">"...TimeBasedRollingPolicy"</span>&gt;
+    &lt;fileNamePattern&gt;application-%d{yyyy-MM-dd}.log&lt;/fileNamePattern&gt;
+    &lt;maxHistory&gt;30&lt;/maxHistory&gt;   <span class="c-cm">&lt;!-- 30일 보관 --&gt;</span>
+  &lt;/rollingPolicy&gt;
+&lt;/appender&gt;</pre>
+    </div>
+  </div>
+  <div class="d-note">
+    <div><b>문제</b> — 로그가 콘솔에만 남아 서버를 재시작하면 사라졌다. 침해 사고가 나도 <b>무슨 일이 있었는지 확인할 근거가 없다</b>.</div>
+    <div class="ok"><b>해결</b> — 일자별 파일로 30일간 보관하고, 같은 설정에서 개행 문자까지 제거해 로그 위조도 함께 막는다.</div>
+  </div>
+
+</section>
+
+<!-- 13 A10 -->
+<section class="slide canvas">
+  <div class="kicker"><b>A10:2025</b> &nbsp;Mishandling of Exceptional Conditions</div>
+  <h2 class="title">예외는 삼키지 않고,<br>내부 정보는 흘리지 않는다</h2>
+
+  <div class="diff">
+    <div class="d-card before">
+      <div class="d-head"><span class="d-tag">수정 전</span><span class="d-path">global/exception/GlobalExceptionHandler.java</span></div>
+<pre>@ExceptionHandler(IllegalArgumentException.class)
+<span class="c-kw">public</span> ResponseEntity&lt;Map&lt;String, String&gt;&gt; handleBadRequest(
+        IllegalArgumentException e) {
+    <span class="c-cm">// 로그 기록 없음</span>
+    <span class="c-kw">return</span> ResponseEntity.badRequest()
+        .body(Map.of(<span class="c-str">"message"</span>, <span class="c-bad">e.getMessage()</span>));
+    <span class="c-cm">// 내부 예외 메시지를 클라이언트에 그대로 전달</span>
+}</pre>
+    </div>
+    <div class="d-card after">
+      <div class="d-head"><span class="d-tag">수정 후</span><span class="d-path">같은 파일</span></div>
+<pre>@ExceptionHandler(IllegalArgumentException.class)
+<span class="c-kw">public</span> ResponseEntity&lt;Map&lt;String, String&gt;&gt; handleBadRequest(
+        IllegalArgumentException e) {
+    log.warn(<span class="c-str">"잘못된 요청 처리 중 예외가 발생했습니다."</span>, e);  <span class="c-cm">// 상세는 로그에만</span>
+    <span class="c-kw">return</span> ResponseEntity.badRequest()
+        .body(Map.of(<span class="c-str">"message"</span>, <span class="c-str">"잘못된 요청입니다."</span>));  <span class="c-cm">// 응답은 일반화</span>
+}</pre>
+    </div>
+  </div>
+  <div class="d-note">
+    <div><b>문제</b> — 내부 예외 메시지가 그대로 응답에 실려 테이블·컬럼명이나 내부 로직이 노출될 수 있었다. 게다가 로그도 남지 않아 원인 추적이 어려웠다.</div>
+    <div class="ok"><b>해결</b> — 클라이언트에는 일반화된 문구만 보내고 <b>상세 원인은 서버 로그에만</b> 남긴다.</div>
+  </div>
+
+</section>
+
+<!-- 14 남은 과제 -->
+<section class="slide on-dark">
+  <div class="kicker">남은 과제</div>
+  <h2 class="title" style="color:var(--on-dark);">아직 채우지 못한 것</h2>
+
+  <div class="todo-list">
+    <div class="todo">
+      <div class="t-id">A06</div>
+      <div class="t-body">
+        <h3>위협 모델 문서화</h3>
+        <p>보안 요구사항(S-087 등 6건)과 항목별 대응책은 정리돼 있으나, 자산 · 공격자 · 공격 경로를 한 장으로 묶은 위협 모델 문서는 아직 없다. 새 기능을 설계할 때 이 문서를 먼저 갱신하는 절차를 넣는 것이 다음 단계다.</p>
+      </div>
+    </div>
+    <div class="todo">
+      <div class="t-id">운영</div>
+      <div class="t-body">
+        <h3>HTTPS 적용이 선행되어야 완성되는 항목</h3>
+        <p>HSTS 헤더는 이미 넣었지만 현재 nginx는 80 포트만 열려 있어 실제 효력이 없다. 로드밸런서나 CDN에서 TLS를 종료하도록 붙이면 그 시점부터 동작한다.</p>
+      </div>
+    </div>
+    <div class="todo">
+      <div class="t-id">검증</div>
+      <div class="t-body">
+        <h3>CSP 실환경 확인</h3>
+        <p>Turnstile · Toss · Firebase · 카카오 우편번호 4개 플로우를 배포 환경에서 실행해 브라우저 콘솔에 CSP 위반이 없는지 확인해야 한다. 로컬 개발 서버는 nginx를 거치지 않아 검증되지 않는다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var nav = document.getElementById('navDots');
+    var gnCount = document.getElementById('gnCount');
+    var labels = ['타이틀', '한눈에 보기', 'A01 접근통제', 'A02 보안설정', '보안 헤더 6종', 'A03 공급망', 'A04 암호화', 'A05 인젝션', 'A06 설계', 'A07 인증', 'A08 무결성', 'A09 로깅', 'A10 예외처리', '남은 과제'];
+    var total = slides.length;
+
+    slides.forEach(function (s, i) {
+      var btn = document.createElement('button');
+      btn.setAttribute('aria-label', '슬라이드 ' + (i + 1) + ': ' + labels[i]);
+      var lbl = document.createElement('span');
+      lbl.className = 'dot-label';
+      lbl.textContent = (i + 1) + '. ' + labels[i];
+      btn.appendChild(lbl);
+      btn.addEventListener('click', function () { s.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+      nav.appendChild(btn);
+    });
+
+    var dots = Array.prototype.slice.call(nav.children);
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          var idx = slides.indexOf(entry.target);
+          if (entry.isIntersecting) {
+            dots.forEach(function (d) { d.classList.remove('active'); });
+            dots[idx].classList.add('active');
+            gnCount.textContent = pad(idx + 1) + ' / ' + pad(total);
+          }
+        });
+      }, { threshold: 0.4 });
+      slides.forEach(function (s) { io.observe(s); });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      var current = slides.findIndex(function (s) {
+        var r = s.getBoundingClientRect();
+        return r.top >= -10 && r.top < window.innerHeight * 0.5;
+      });
+      if (current === -1) current = 0;
+      if (e.key === 'ArrowDown' && slides[current + 1]) slides[current + 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      else if (e.key === 'ArrowUp' && slides[current - 1]) slides[current - 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  })();
+</script>
